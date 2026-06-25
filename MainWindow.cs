@@ -57,7 +57,7 @@ namespace MapaMaquinas
             _config      = new Config();
             _jsonManager = new JsonManager(_repositorio);
 
-            Title        = "Mapa de Máquinas — BigCard TI";
+            Title        = "Mapa Máquinas — BigCard TI v2.0";
             Width        = 1280;
             Height       = 780;
             MinWidth     = 800;
