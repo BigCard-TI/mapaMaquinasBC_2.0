@@ -10,8 +10,10 @@ using System.Windows.Media.Imaging;
 using Microsoft.Win32;
 using MapaMaquinas.Controls;
 using MapaMaquinas.Services;
+using System.Linq;
 using MapaMaquinas.Models;
 using MapaMaquinas.Services;
+using System.Linq;
 using MapaMaquinas.Views;
 
 namespace MapaMaquinas
@@ -44,6 +46,14 @@ namespace MapaMaquinas
         // ── Fila de ping ──────────────────────────────────────────────────────
         private PingQueue? _pingQueue;
 
+        // ── Desfazer ──────────────────────────────────────────────────────────
+        private readonly UndoManager _undo = new();
+        private Button _btnUndo = null!;
+
+        // ── Filtro sem IP ─────────────────────────────────────────────────────
+        private bool   _filtroSemIp = false;
+        private Button _btnFiltroSemIp = null!;
+
         // ── Zoom ──────────────────────────────────────────────────────────────
         private double         _escala         = 1.0;
         private const double   EscalaMin       = 0.25;
@@ -57,7 +67,7 @@ namespace MapaMaquinas
             _config      = new Config();
             _jsonManager = new JsonManager(_repositorio);
 
-            Title        = "Mapa Máquinas — BigCard TI v2.0";
+            Title        = "Mapa de Máquinas — BigCard TI";
             Width        = 1280;
             Height       = 780;
             MinWidth     = 800;
@@ -444,6 +454,28 @@ namespace MapaMaquinas
 
             panel.Items.Add(new Separator());
 
+            // ── Desfazer ──────────────────────────────────────────────────────
+            _btnUndo = new Button
+            {
+                Content = "↩ Desfazer", Margin = new Thickness(2),
+                ToolTip = "Desfaz o último movimento de card (Ctrl+Z)",
+                IsEnabled = false
+            };
+            _btnUndo.Click += (_, _) => Desfazer();
+            panel.Items.Add(_btnUndo);
+
+            // ── Filtro sem IP ─────────────────────────────────────────────────
+            _btnFiltroSemIp = new Button
+            {
+                Content = "⚠ Sem IP", Margin = new Thickness(2),
+                ToolTip = "Destacar máquinas sem IP cadastrado",
+                IsEnabled = true
+            };
+            _btnFiltroSemIp.Click += (_, _) => ToggleFiltroSemIp();
+            panel.Items.Add(_btnFiltroSemIp);
+
+            panel.Items.Add(new Separator());
+
             // ── Controles de Zoom ─────────────────────────────────────────────
             var btnZoomOut = new Button { Content = "−", Width = 24, Margin = new Thickness(2), ToolTip = "Diminuir zoom (Ctrl+−)" };
             btnZoomOut.Click += (_, _) => AjustarZoom(-EscalaStep);
@@ -490,6 +522,7 @@ namespace MapaMaquinas
             if (e.Key == Key.S && (Keyboard.Modifiers & ModifierKeys.Control) != 0) Salvar();
             if (e.Key == Key.O && (Keyboard.Modifiers & ModifierKeys.Control) != 0) AbrirArquivo();
             if (e.Key == Key.Insert) NovaMaquina();
+            if (e.Key == Key.Z && (Keyboard.Modifiers & ModifierKeys.Control) != 0) Desfazer();
             if ((Keyboard.Modifiers & ModifierKeys.Control) != 0)
             {
                 if (e.Key == Key.OemPlus  || e.Key == Key.Add)      AjustarZoom(+EscalaStep);
@@ -596,6 +629,7 @@ namespace MapaMaquinas
                 card.Editar     += (s, _) => EditarMaquina(card);
                 card.Remover    += (s, _) => RemoverMaquina(card);
                 card.Visualizar += (s, _) => VisualizarMaquina(card);
+                card.PreMover   += (s, _) => { _undo.Registrar((CardMaquina)s!); AtualizarBtnUndo(); };
                 card.MouseLeftButtonUp += (_, _) => MarcarAlterado();
 
                 Canvas.SetLeft(card, m.PosX);
@@ -631,8 +665,10 @@ namespace MapaMaquinas
 
         private void LimparCards()
         {
-            // Para a fila centralizada antes de descartar os cards
+            // Para a fila centralizada e limpa o histórico de desfazer
             _pingQueue?.Parar();
+            _undo.Limpar();
+            AtualizarBtnUndo();
 
             foreach (var c in _cards)      _mapaCanvas.Children.Remove(c);
             foreach (var c in _cardsPorta) _mapaCanvas.Children.Remove(c);
@@ -659,6 +695,7 @@ namespace MapaMaquinas
             card.Editar     += (_, _) => EditarMaquina(card);
             card.Remover    += (_, _) => RemoverMaquina(card);
             card.Visualizar += (_, _) => VisualizarMaquina(card);
+            card.PreMover   += (s, _) => { _undo.Registrar((CardMaquina)s!); AtualizarBtnUndo(); };
             card.MouseLeftButtonUp += (_, _) => MarcarAlterado();
 
             Canvas.SetLeft(card, m.PosX);
@@ -678,6 +715,7 @@ namespace MapaMaquinas
             card.AtualizarSetor(setor!);
             card.Maquina = card.Maquina; // força re-render
             MarcarAlterado();
+            if (_filtroSemIp) AplicarFiltroSemIp();
         }
 
         private void RemoverMaquina(CardMaquina card)
@@ -957,6 +995,57 @@ namespace MapaMaquinas
         private void OnPingCicloCompleto()
         {
             // Nada especial — o progresso já foi resetado para "aguardando"
+        }
+
+        // ── Desfazer ──────────────────────────────────────────────────────────
+        private void Desfazer()
+        {
+            var card = _undo.Desfazer();
+            if (card == null) return;
+            MarcarAlterado();
+            AtualizarBtnUndo();
+
+            // Rola o viewport até o card restaurado
+            _mapaScroll.ScrollToHorizontalOffset(Canvas.GetLeft(card) - 100);
+            _mapaScroll.ScrollToVerticalOffset(Canvas.GetTop(card) - 100);
+        }
+
+        private void AtualizarBtnUndo()
+        {
+            if (_btnUndo == null) return;
+            _btnUndo.IsEnabled = _undo.PodeDesfazer;
+            _btnUndo.ToolTip   = _undo.PodeDesfazer
+                ? $"Desfaz o último movimento (Ctrl+Z) — {_undo.Quantidade} na pilha"
+                : "Nenhum movimento para desfazer";
+        }
+
+        // ── Filtro sem IP ──────────────────────────────────────────────────────
+        private void ToggleFiltroSemIp()
+        {
+            _filtroSemIp = !_filtroSemIp;
+            _btnFiltroSemIp.Background = _filtroSemIp
+                ? new SolidColorBrush(Color.FromRgb(255, 200, 60))
+                : null;
+            AplicarFiltroSemIp();
+        }
+
+        private void AplicarFiltroSemIp()
+        {
+            int semIp = 0;
+            foreach (var card in _cards)
+            {
+                if (string.IsNullOrWhiteSpace(card.Maquina?.Ip))
+                {
+                    semIp++;
+                    // Destaca com highlight de busca se o filtro está ativo
+                    card.SetHighlight(_filtroSemIp);
+                }
+            }
+
+            if (_filtroSemIp)
+                AtualizarStatus($"Filtro ativo: {semIp} máquina(s) sem IP cadastrado");
+            else if (_empresaAtual != null)
+                AtualizarStatus($"{_empresaAtual.Nome}  |  {_empresaAtual.Maquinas.Count} máquina(s)  |  {_empresaAtual.Portas.Count} porta(s)");
         }
 
         private void MarcarAlterado()

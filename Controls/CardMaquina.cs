@@ -65,6 +65,8 @@ namespace MapaMaquinas.Controls
         public event EventHandler? Editar;
         public event EventHandler? Remover;
         public event EventHandler? Visualizar;
+        /// <summary>Disparado no início do drag — antes de mover. Usado pelo UndoManager.</summary>
+        public event EventHandler? PreMover;
 
         // ── Propriedades ──────────────────────────────────────────────────────
         public Maquina? Maquina
@@ -267,6 +269,30 @@ namespace MapaMaquinas.Controls
             // Linha 3 — Ramal (opcional)
             if (!string.IsNullOrEmpty(_maquina.Ramal))
                 DesenharTexto(dc, _maquina.Ramal, bold: true, y: y);
+
+            // Badge "sem IP" — triângulo laranja no canto inferior direito
+            if (string.IsNullOrWhiteSpace(_maquina.Ip))
+                DesenharBadgeSemIp(dc);
+        }
+
+        /// <summary>Triângulo laranja no canto inferior direito indicando IP não cadastrado.</summary>
+        private void DesenharBadgeSemIp(DrawingContext dc)
+        {
+            const double s = 10; // tamanho do triângulo
+            var brush = new SolidColorBrush(Color.FromRgb(255, 140, 0));
+            var geo = new StreamGeometry();
+            using (var ctx = geo.Open())
+            {
+                ctx.BeginFigure(new Point(Width,     Height - s), true, true);
+                ctx.LineTo(new Point(Width - s, Height),     true, false);
+                ctx.LineTo(new Point(Width,     Height),     true, false);
+            }
+            geo.Freeze();
+            dc.DrawGeometry(brush, null, geo);
+
+            // "!" branco pequeno dentro do triângulo
+            var ft = MakeText("!", 5.5, bold: true);
+            dc.DrawText(ft, new Point(Width - ft.Width - 1.5, Height - ft.Height - 0.5));
         }
 
         private void DesenharTexto(DrawingContext dc, string texto, bool bold, double y)
@@ -303,6 +329,8 @@ namespace MapaMaquinas.Controls
         {
             base.OnMouseLeftButtonDown(e);
             if (e.ClickCount == 2) { Visualizar?.Invoke(this, EventArgs.Empty); return; }
+            // Notifica ANTES de mover — UndoManager registra a posição atual
+            PreMover?.Invoke(this, EventArgs.Empty);
             _dragging   = true;
             _dragOrigin = e.GetPosition(this);
             CaptureMouse();

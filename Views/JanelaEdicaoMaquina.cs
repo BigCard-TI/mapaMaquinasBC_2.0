@@ -146,6 +146,21 @@ namespace MapaMaquinas.Views
         }
 
 
+        private string IpDuplicado(string ip)
+        {
+            if (string.IsNullOrWhiteSpace(ip)) return "";
+            foreach (var m in _empresa.Maquinas)
+            {
+                // ignora a própria máquina ao editar
+                if (_maquina != null && string.Equals(m.Id, _maquina.Id,
+                        StringComparison.OrdinalIgnoreCase)) continue;
+                if (string.Equals(m.Ip.Trim(), ip.Trim(),
+                        StringComparison.OrdinalIgnoreCase))
+                    return m.Hostname;
+            }
+            return "";
+        }
+
         private void OnSalvar(object sender, RoutedEventArgs e)
         {
             if (string.IsNullOrWhiteSpace(_edHostname.Text))
