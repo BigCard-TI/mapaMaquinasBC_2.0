@@ -87,6 +87,7 @@ namespace MapaMaquinas.Services
                 {
                     Id          = Str(obj, "id"),
                     Hostname    = Str(obj, "hostname"),
+                    Ip          = Str(obj, "ip"),
                     Processador = Str(obj, "processador"),
                     Ram         = Str(obj, "ram"),
                     Storage     = Str(obj, "storage"),
@@ -175,6 +176,7 @@ namespace MapaMaquinas.Services
                 {
                     ["id"]           = m.Id,
                     ["hostname"]     = m.Hostname,
+                    ["ip"]           = m.Ip,
                     ["processador"]  = m.Processador,
                     ["ram"]          = m.Ram,
                     ["storage"]      = m.Storage,

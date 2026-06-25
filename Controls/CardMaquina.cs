@@ -15,7 +15,7 @@ namespace MapaMaquinas.Controls
     /// Layout:
     ///   ┌─┬──────────────────────┐
     ///   │█│ PC-NOME              │   ← hostname
-    ///   │█│ 192.168.0.10  P.5   │   ← IP resolvido via DNS + porta switch
+    ///   │█│ 192.168.0.10  P.5   │   ← IP do JSON + porta switch
     ///   │█│ 201                  │   ← ramal (opcional)
     ///   └─┴──────────────────────┘
     ///    ↑ barra lateral colorida (verde/vermelho/amarelo = status geral do ping)
@@ -154,16 +154,12 @@ namespace MapaMaquinas.Controls
         {
             if (_maquina == null) return;
 
-            var ipLinha = string.IsNullOrEmpty(_ping.IpResolvido)
-                ? "(resolvendo...)"
-                : _ping.IpResolvido;
-
             var statusDesc = _ping.Status switch
             {
-                StatusMaquina.Online    => $"Online ({_ping.Latencia} ms)",
-                StatusMaquina.DnsAlerta => $"Ligada via IP ({_ping.Latencia} ms) — nome não responde",
-                StatusMaquina.Offline   => "Offline — sem resposta",
-                _                       => "Aguardando verificação..."
+                StatusMaquina.Online   => $"Online ({_ping.Latencia} ms)",
+                StatusMaquina.IpAlerta => $"Ligada via IP ({_ping.Latencia} ms) — hostname sem resposta",
+                StatusMaquina.Offline  => "Offline — sem resposta",
+                _                      => "Aguardando verificação..."
             };
 
             ToolTip = new ToolTip
@@ -172,7 +168,7 @@ namespace MapaMaquinas.Controls
                     $"{_maquina.Hostname}\n" +
                     $"──────────────────────────\n" +
                     $"Status : {statusDesc}\n" +
-                    $"IP     : {ipLinha}\n" +
+                    $"IP     : {_maquina.Ip}\n" +
                     $"──────────────────────────\n" +
                     $"Tipo: {_maquina.Tipo}   Porta SW: {_maquina.PortaSwitch}\n" +
                     $"CPU: {_maquina.Processador}\n" +
@@ -210,7 +206,7 @@ namespace MapaMaquinas.Controls
             var corBarra = _ping.Status switch
             {
                 StatusMaquina.Online     => CorOnline,
-                StatusMaquina.DnsAlerta  => CorAguard,   // amarelo: viva mas DNS problemático
+                StatusMaquina.IpAlerta   => CorAguard,   // amarelo: ligada via IP, hostname sem resposta
                 StatusMaquina.Offline    => CorOffline,
                 _                        => CorSemAlvo   // Aguardando
             };
@@ -244,7 +240,7 @@ namespace MapaMaquinas.Controls
             y += LinhaH;
 
             // Linha 2 — IP resolvido via DNS + porta switch
-            var ipTxt = string.IsNullOrEmpty(_ping.IpResolvido) ? "..." : _ping.IpResolvido;
+            var ipTxt = string.IsNullOrEmpty(_maquina.Ip) ? "—" : _maquina.Ip;
             if (!string.IsNullOrEmpty(_maquina.PortaSwitch)) ipTxt += "  P." + _maquina.PortaSwitch;
             DesenharTexto(dc, ipTxt, bold: false, y: y);
             y += LinhaH;

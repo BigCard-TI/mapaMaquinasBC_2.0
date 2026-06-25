@@ -35,9 +35,9 @@ namespace MapaMaquinas.Models
         public string Id          { get; set; } = "";
         public string Hostname    { get; set; } = "";
         public string Processador { get; set; } = "";
+        public string Ip          { get; set; } = "";
         public string Ram         { get; set; } = "";
         public string Storage     { get; set; } = "";
-        // IP não é mais salvo — resolvido via DNS em tempo real
         public string PortaSwitch { get; set; } = "";
         public string Ramal       { get; set; } = "";
         public string SetorId     { get; set; } = "";

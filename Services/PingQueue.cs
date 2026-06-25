@@ -112,7 +112,8 @@ namespace MapaMaquinas.Services
         private async Task PingarCard(CardMaquina card, CancellationToken token)
         {
             var hostname = card.Maquina?.Hostname ?? "";
-            var resultado = await PingWorker.Executar(hostname, token);
+            var ip       = card.Maquina?.Ip       ?? "";
+            var resultado = await PingWorker.Executar(hostname, ip, token);
 
             if (!token.IsCancellationRequested)
                 _dispatcher.Invoke(() => card.AtualizarResultadoPing(resultado));

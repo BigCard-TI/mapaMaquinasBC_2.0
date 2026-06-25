@@ -144,13 +144,13 @@ Tipos de máquina aceitos: `desktop`, `notebook`, `mac`, `servidor`, `impressora
 
 Cada card exibe uma barra colorida na lateral esquerda indicando o estado da máquina na rede.
 
-O IP nunca é salvo no JSON — é sempre resolvido via DNS em tempo real a partir do hostname.
+O IP é salvo no JSON junto com o hostname. A verificação usa os dois.
 
 **Lógica de verificação (em ordem):**
 
 1. Tenta ping pelo **hostname** → respondeu: **Online** ✔
-2. Se falhou: resolve DNS e tenta ping pelo **IP** → respondeu: **DNS com problema** ⚠
-3. Se falhou também: **Offline** ✗
+2. Hostname falhou → tenta ping pelo **IP** → respondeu: **IpAlerta** ⚠ (ligada, mas hostname sem resposta)
+3. Ambos falharam: **Offline** ✗
 
 **Estados possíveis:**
 
@@ -174,7 +174,7 @@ O IP nunca é salvo no JSON — é sempre resolvido via DNS em tempo real a part
 | Cor | Significado |
 |---|---|
 | 🟢 Verde | Online — hostname respondeu ao ping |
-| 🟡 Amarelo | Alerta — hostname não responde mas IP sim (verificar DNS) |
+| 🟡 Amarelo | Alerta — hostname sem resposta, mas IP responde (verificar DNS/nome) |
 | 🔴 Vermelho | Offline — nenhum ping respondeu |
 | ⬜ Cinza | Aguardando — ainda não verificado neste ciclo |
 

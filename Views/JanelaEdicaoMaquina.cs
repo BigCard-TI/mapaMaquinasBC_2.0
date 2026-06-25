@@ -15,6 +15,7 @@ namespace MapaMaquinas.Views
         private TextBox   _edHostname    = null!;
         private TextBox   _edProcessador = null!;
         private TextBox   _edRam         = null!;
+        private TextBox   _edIp          = null!;
         private TextBox   _edStorage     = null!;
         private TextBox   _edPorta       = null!;
         private TextBox   _edRamal       = null!;
@@ -51,6 +52,7 @@ namespace MapaMaquinas.Views
             _edProcessador = AddCampo(stack, "Processador");
             _edRam         = AddCampo(stack, "RAM");
             _edStorage     = AddCampo(stack, "Storage");
+            _edIp          = AddCampo(stack, "IP");
             _edPorta       = AddCampo(stack, "Porta Switch");
             _edRamal       = AddCampo(stack, "Ramal");
             _edObs         = AddCampo(stack, "Observações");
@@ -121,6 +123,7 @@ namespace MapaMaquinas.Views
             _edHostname.Text    = _maquina.Hostname;
             _edProcessador.Text = _maquina.Processador;
             _edRam.Text         = _maquina.Ram;
+            _edIp.Text          = _maquina.Ip;
             _edStorage.Text     = _maquina.Storage;
             _edPorta.Text       = _maquina.PortaSwitch;
             _edRamal.Text       = _maquina.Ramal;
@@ -168,6 +171,7 @@ namespace MapaMaquinas.Views
             _maquina.Hostname    = _edHostname.Text.Trim();
             _maquina.Processador = _edProcessador.Text;
             _maquina.Ram         = _edRam.Text;
+            _maquina.Ip          = _edIp.Text;
             _maquina.Storage     = _edStorage.Text;
             _maquina.PortaSwitch = _edPorta.Text;
             _maquina.Ramal       = _edRamal.Text;
