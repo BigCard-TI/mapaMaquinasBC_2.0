@@ -285,11 +285,11 @@ namespace MapaMaquinas
             KeyDown += OnKeyDown;
             if (_config.CaminhoValido())
             {
-                var arquivo = _config.Arquivo("maquinas.json");
+                var arquivo = _config.Arquivo("mapa_maquinas.json");
                 if (File.Exists(arquivo))
                     CarregarArquivo(arquivo);
                 else
-                    AtualizarStatus("Arquivo maquinas.json não encontrado. Use Arquivo > Abrir para localizar.");
+                    AtualizarStatus("Arquivo mapa_maquinas.json não encontrado. Use Arquivo > Abrir para localizar.");
             }
             else
             {
