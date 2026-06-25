@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <UseWindowsForms>true</UseWindowsForms>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <AssemblyName>MapaMaquinas</AssemblyName>
+    <RootNamespace>MapaMaquinas</RootNamespace>
+    <ApplicationIcon>app.ico</ApplicationIcon>
+    <StartupObject>MapaMaquinas.App</StartupObject>
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+    <Platforms>x86;x64</Platforms>
+    <PlatformTarget>x86</PlatformTarget>
+    <Optimize>true</Optimize>
+  </PropertyGroup>
+
+  <!-- Sem referências NuGet extras: usa apenas APIs do .NET 8 padrão -->
+
+</Project>
