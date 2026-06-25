@@ -154,12 +154,12 @@ namespace MapaMaquinas.Controls
         {
             if (_maquina == null) return;
 
-            var statusDesc = _ping.Status switch
+            string StrStatus(StatusPing s, long lat) => s switch
             {
-                StatusMaquina.Online   => $"Online ({_ping.Latencia} ms)",
-                StatusMaquina.IpAlerta => $"Ligada via IP ({_ping.Latencia} ms) — hostname sem resposta",
-                StatusMaquina.Offline  => "Offline — sem resposta",
-                _                      => "Aguardando verificação..."
+                StatusPing.Online     => $"OK ({lat} ms)",
+                StatusPing.Offline    => "Sem resposta",
+                StatusPing.Aguardando => "Aguardando...",
+                _                     => "—"
             };
 
             ToolTip = new ToolTip
@@ -167,9 +167,10 @@ namespace MapaMaquinas.Controls
                 Content =
                     $"{_maquina.Hostname}\n" +
                     $"──────────────────────────\n" +
-                    $"Status : {statusDesc}\n" +
-                    $"IP     : {_maquina.Ip}\n" +
+                    $"Hostname : {StrStatus(_ping.StatusHostname, _ping.LatenciaHostname)}\n" +
+                    $"IP       : {StrStatus(_ping.StatusIp,       _ping.LatenciaIp)}\n" +
                     $"──────────────────────────\n" +
+                    $"IP cadastrado : {_maquina.Ip}\n" +
                     $"Tipo: {_maquina.Tipo}   Porta SW: {_maquina.PortaSwitch}\n" +
                     $"CPU: {_maquina.Processador}\n" +
                     $"RAM: {_maquina.Ram}   HD: {_maquina.Storage}" +
@@ -203,17 +204,35 @@ namespace MapaMaquinas.Controls
             dc.DrawRectangle(new SolidColorBrush(corFundo), null, rect);
 
             // ── Barra lateral colorida (status geral do ping) ─────────────────
-            var corBarra = _ping.Status switch
+            // Barra dividida: metade de cima = hostname, metade de baixo = IP
+            double meioY = Height / 2;
+
+            var corHostname = _ping.StatusHostname switch
             {
-                StatusMaquina.Online     => CorOnline,
-                StatusMaquina.IpAlerta   => CorAguard,   // amarelo: ligada via IP, hostname sem resposta
-                StatusMaquina.Offline    => CorOffline,
-                _                        => CorSemAlvo   // Aguardando
+                StatusPing.Online     => CorOnline,
+                StatusPing.Offline    => CorOffline,
+                StatusPing.SemAlvo    => CorSemAlvo,
+                _                     => CorAguard
             };
-            dc.DrawRectangle(
-                new SolidColorBrush(corBarra),
-                null,
-                new Rect(0, 0, BarraW, Height));
+            var corIp = _ping.StatusIp switch
+            {
+                StatusPing.Online     => CorOnline,
+                StatusPing.Offline    => CorOffline,
+                StatusPing.SemAlvo    => CorSemAlvo,
+                _                     => CorAguard
+            };
+
+            // Metade superior — hostname
+            dc.DrawRectangle(new SolidColorBrush(corHostname), null,
+                new Rect(0, 0, BarraW, meioY));
+
+            // Metade inferior — IP
+            dc.DrawRectangle(new SolidColorBrush(corIp), null,
+                new Rect(0, meioY, BarraW, meioY));
+
+            // Linha divisória sutil entre as duas metades
+            dc.DrawLine(new Pen(new SolidColorBrush(Color.FromArgb(80, 0, 0, 0)), 0.5),
+                new Point(0, meioY), new Point(BarraW, meioY));
 
             // ── Borda externa / highlight ─────────────────────────────────────
             if (_highlight && _blinkState)

@@ -3,16 +3,16 @@
   "WorkspaceRootPath": "C:\\Users\\rafael.souza\\Desktop\\BC - Rafael\\Projects\\Projects\\mapaMaquinasBC_2.0\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{0461D450-AAE0-9228-5530-DE411B6F510F}|MapaMaquinas.csproj|c:\\users\\rafael.souza\\desktop\\bc - rafael\\projects\\projects\\mapamaquinasbc_2.0\\mainwindow.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0461D450-AAE0-9228-5530-DE411B6F510F}|MapaMaquinas.csproj|solutionrelative:mainwindow.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{0461D450-AAE0-9228-5530-DE411B6F510F}|MapaMaquinas.csproj|c:\\users\\rafael.souza\\desktop\\bc - rafael\\projects\\projects\\mapamaquinasbc_2.0\\readme.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}",
       "RelativeMoniker": "D:0:0:{0461D450-AAE0-9228-5530-DE411B6F510F}|MapaMaquinas.csproj|solutionrelative:readme.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{0461D450-AAE0-9228-5530-DE411B6F510F}|MapaMaquinas.csproj|c:\\users\\rafael.souza\\desktop\\bc - rafael\\projects\\projects\\mapamaquinasbc_2.0\\services\\pingservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{0461D450-AAE0-9228-5530-DE411B6F510F}|MapaMaquinas.csproj|solutionrelative:services\\pingservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{0461D450-AAE0-9228-5530-DE411B6F510F}|MapaMaquinas.csproj|c:\\users\\rafael.souza\\desktop\\bc - rafael\\projects\\projects\\mapamaquinasbc_2.0\\mainwindow.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{0461D450-AAE0-9228-5530-DE411B6F510F}|MapaMaquinas.csproj|solutionrelative:mainwindow.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{0461D450-AAE0-9228-5530-DE411B6F510F}|MapaMaquinas.csproj|c:\\users\\rafael.souza\\desktop\\bc - rafael\\projects\\projects\\mapamaquinasbc_2.0\\services\\config.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -30,11 +30,11 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 1,
+          "SelectedChildIndex": 3,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 2,
               "Title": "PingService.cs",
               "DocumentMoniker": "C:\\Users\\rafael.souza\\Desktop\\BC - Rafael\\Projects\\Projects\\mapaMaquinasBC_2.0\\Services\\PingService.cs",
               "RelativeDocumentMoniker": "Services\\PingService.cs",
@@ -46,13 +46,13 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 1,
               "Title": "README.md",
               "DocumentMoniker": "C:\\Users\\rafael.souza\\Desktop\\BC - Rafael\\Projects\\Projects\\mapaMaquinasBC_2.0\\README.md",
               "RelativeDocumentMoniker": "README.md",
               "ToolTip": "C:\\Users\\rafael.souza\\Desktop\\BC - Rafael\\Projects\\Projects\\mapaMaquinasBC_2.0\\README.md",
               "RelativeToolTip": "README.md",
-              "ViewState": "AgIAADoAAAAAAAAAAAAIwEsAAAADAAAAAAAAAA==",
+              "ViewState": "AgIAADoAAAAAAAAAAAAIwFEAAAADAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001818|",
               "WhenOpened": "2026-06-25T12:17:44.809Z",
               "EditorCaption": ""
@@ -71,15 +71,16 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 0,
               "Title": "MainWindow.cs",
               "DocumentMoniker": "C:\\Users\\rafael.souza\\Desktop\\BC - Rafael\\Projects\\Projects\\mapaMaquinasBC_2.0\\MainWindow.cs",
               "RelativeDocumentMoniker": "MainWindow.cs",
               "ToolTip": "C:\\Users\\rafael.souza\\Desktop\\BC - Rafael\\Projects\\Projects\\mapaMaquinasBC_2.0\\MainWindow.cs",
               "RelativeToolTip": "MainWindow.cs",
-              "ViewState": "AgIAALEBAAAAAAAAAAAnwAYCAAAnAAAAAAAAAA==",
+              "ViewState": "AgIAABIAAAAAAAAAAAAqwBIAAAARAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-06-25T12:10:24.123Z"
+              "WhenOpened": "2026-06-25T12:10:24.123Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",

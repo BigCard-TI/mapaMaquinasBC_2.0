@@ -190,15 +190,66 @@ namespace MapaMaquinas
                 Margin     = new Thickness(0, 0, 0, 6)
             });
 
-            // Itens da legenda
-            AdicionarItemLegenda(stack, Color.FromRgb(50,  205, 50),  "Online",
-                "Hostname respondeu ao ping");
-            AdicionarItemLegenda(stack, Color.FromRgb(255, 190, 0),   "Alerta DNS",
-                "Hostname falhou, IP respondeu");
-            AdicionarItemLegenda(stack, Color.FromRgb(210, 50,  50),  "Offline",
-                "Nenhum ping respondeu");
-            AdicionarItemLegenda(stack, Color.FromRgb(110, 110, 110), "Aguardando",
-                "Ainda não verificada");
+            // Explicação da barra dividida
+            stack.Children.Add(new TextBlock
+            {
+                Text         = "A barra é dividida em duas metades:",
+                FontSize     = 8,
+                Foreground   = new SolidColorBrush(Color.FromRgb(90, 90, 100)),
+                TextWrapping = TextWrapping.Wrap,
+                Margin       = new Thickness(0, 0, 0, 6)
+            });
+
+            AdicionarItemLegenda(stack, Color.FromRgb(50,  205, 50),  "Verde",
+                "Ping respondeu");
+            AdicionarItemLegenda(stack, Color.FromRgb(210, 50,  50),  "Vermelho",
+                "Sem resposta");
+            AdicionarItemLegenda(stack, Color.FromRgb(255, 190, 0),   "Amarelo",
+                "Aguardando verificação");
+            AdicionarItemLegenda(stack, Color.FromRgb(110, 110, 110), "Cinza",
+                "Sem dado cadastrado");
+
+            // Separador
+            stack.Children.Add(new Border
+            {
+                BorderBrush = new SolidColorBrush(Color.FromRgb(210, 210, 215)),
+                BorderThickness = new Thickness(0, 1, 0, 0),
+                Margin = new Thickness(0, 4, 0, 6)
+            });
+
+            // Exemplo visual da barra dividida
+            stack.Children.Add(new TextBlock
+            {
+                Text         = "Exemplo:",
+                FontSize     = 8,
+                FontWeight   = FontWeights.SemiBold,
+                Foreground   = new SolidColorBrush(Color.FromRgb(90, 90, 100)),
+                Margin       = new Thickness(0, 0, 0, 4)
+            });
+
+            AdicionarItemLegendaDupla(stack,
+                Color.FromRgb(50,  205, 50),
+                Color.FromRgb(50,  205, 50),
+                "Tudo OK",
+                "Hostname e IP respondem");
+
+            AdicionarItemLegendaDupla(stack,
+                Color.FromRgb(50,  205, 50),
+                Color.FromRgb(210, 50,  50),
+                "IP errado",
+                "Hostname OK, IP sem resposta");
+
+            AdicionarItemLegendaDupla(stack,
+                Color.FromRgb(210, 50,  50),
+                Color.FromRgb(50,  205, 50),
+                "Nome errado",
+                "IP OK, hostname sem resposta");
+
+            AdicionarItemLegendaDupla(stack,
+                Color.FromRgb(210, 50,  50),
+                Color.FromRgb(210, 50,  50),
+                "Offline",
+                "Nenhum respondeu");
 
             border.Child = stack;
             return border;
@@ -213,18 +264,16 @@ namespace MapaMaquinas
                 Margin      = new Thickness(0, 0, 0, 5)
             };
 
-            // Barra colorida (replica a barra lateral do card)
             row.Children.Add(new Border
             {
-                Width           = 5,
-                Height          = 28,
-                Background      = new SolidColorBrush(cor),
-                CornerRadius    = new CornerRadius(1),
-                Margin          = new Thickness(0, 0, 8, 0),
+                Width             = 5,
+                Height            = 20,
+                Background        = new SolidColorBrush(cor),
+                CornerRadius      = new CornerRadius(1),
+                Margin            = new Thickness(0, 0, 8, 0),
                 VerticalAlignment = VerticalAlignment.Center
             });
 
-            // Texto
             var textos = new StackPanel { Orientation = Orientation.Vertical,
                                           VerticalAlignment = VerticalAlignment.Center };
             textos.Children.Add(new TextBlock
@@ -236,13 +285,57 @@ namespace MapaMaquinas
             });
             textos.Children.Add(new TextBlock
             {
-                Text       = descricao,
-                FontSize   = 9,
-                Foreground = new SolidColorBrush(Color.FromRgb(90, 90, 100)),
+                Text         = descricao,
+                FontSize     = 9,
+                Foreground   = new SolidColorBrush(Color.FromRgb(90, 90, 100)),
                 TextWrapping = TextWrapping.Wrap
             });
             row.Children.Add(textos);
+            parent.Children.Add(row);
+        }
 
+        /// <summary>Item de legenda com barra dividida — metade superior e inferior.</summary>
+        private static void AdicionarItemLegendaDupla(StackPanel parent,
+            Color corCima, Color corBaixo, string titulo, string descricao)
+        {
+            var row = new StackPanel
+            {
+                Orientation = Orientation.Horizontal,
+                Margin      = new Thickness(0, 0, 0, 5)
+            };
+
+            // Barra dividida verticalmente
+            var barra = new Grid { Width = 5, Height = 28, Margin = new Thickness(0, 0, 8, 0) };
+            barra.RowDefinitions.Add(new RowDefinition());
+            barra.RowDefinitions.Add(new RowDefinition());
+
+            var top = new Border { Background = new SolidColorBrush(corCima),
+                                   CornerRadius = new CornerRadius(1, 1, 0, 0) };
+            var bot = new Border { Background = new SolidColorBrush(corBaixo),
+                                   CornerRadius = new CornerRadius(0, 0, 1, 1) };
+            Grid.SetRow(top, 0);
+            Grid.SetRow(bot, 1);
+            barra.Children.Add(top);
+            barra.Children.Add(bot);
+            row.Children.Add(barra);
+
+            var textos = new StackPanel { Orientation = Orientation.Vertical,
+                                          VerticalAlignment = VerticalAlignment.Center };
+            textos.Children.Add(new TextBlock
+            {
+                Text       = titulo,
+                FontSize   = 10,
+                FontWeight = FontWeights.SemiBold,
+                Foreground = Brushes.Black
+            });
+            textos.Children.Add(new TextBlock
+            {
+                Text         = descricao,
+                FontSize     = 9,
+                Foreground   = new SolidColorBrush(Color.FromRgb(90, 90, 100)),
+                TextWrapping = TextWrapping.Wrap
+            });
+            row.Children.Add(textos);
             parent.Children.Add(row);
         }
 

@@ -4,26 +4,26 @@ using System.Threading.Tasks;
 
 namespace MapaMaquinas.Services
 {
-    /// <summary>
-    /// Estados do card:
-    ///   Online    — hostname respondeu ao ping                  (barra verde)
-    ///   IpAlerta  — hostname falhou, IP respondeu               (barra amarela)
-    ///   Offline   — nenhum respondeu                            (barra vermelha)
-    ///   Aguardando — ainda não verificada neste ciclo           (barra cinza)
-    /// </summary>
-    public enum StatusMaquina { Aguardando, Online, IpAlerta, Offline }
+    public enum StatusPing { Aguardando, Online, Offline, SemAlvo }
 
+    /// <summary>
+    /// Resultado com dois status independentes:
+    ///   StatusHostname — resultado do ping pelo nome
+    ///   StatusIp       — resultado do ping pelo IP do JSON
+    /// Cada um alimenta uma metade da barra lateral do card.
+    /// </summary>
     public class ResultadoPing
     {
-        public StatusMaquina Status   { get; init; } = StatusMaquina.Aguardando;
-        public long          Latencia { get; init; }
+        public StatusPing StatusHostname  { get; init; } = StatusPing.Aguardando;
+        public long       LatenciaHostname { get; init; }
+
+        public StatusPing StatusIp        { get; init; } = StatusPing.Aguardando;
+        public long       LatenciaIp      { get; init; }
     }
 
     /// <summary>
-    /// Verificação em dois passos usando hostname e IP fixos do JSON:
-    ///   1. Pinga pelo hostname → OK: Online
-    ///   2. Hostname falhou → pinga pelo IP → OK: IpAlerta (ligada mas nome sem resposta)
-    ///   3. Ambos falharam → Offline
+    /// Pinga hostname e IP em paralelo — completamente independentes.
+    /// Não há ordem de prioridade: os dois sempre são verificados.
     /// </summary>
     public static class PingWorker
     {
@@ -33,40 +33,39 @@ namespace MapaMaquinas.Services
                                                           CancellationToken token)
         {
             if (token.IsCancellationRequested)
-                return new ResultadoPing { Status = StatusMaquina.Aguardando };
+                return new ResultadoPing();
 
-            // Passo 1 — ping pelo hostname
-            if (!string.IsNullOrWhiteSpace(hostname))
+            var taskHostname = PingarAlvo(hostname, token);
+            var taskIp       = PingarAlvo(ip,       token);
+
+            await Task.WhenAll(taskHostname, taskIp);
+
+            var (sHost, lHost) = taskHostname.Result;
+            var (sIp,   lIp)   = taskIp.Result;
+
+            return new ResultadoPing
             {
-                var (ok, lat) = await Pingar(hostname, token);
-                if (ok) return new ResultadoPing { Status = StatusMaquina.Online, Latencia = lat };
-            }
-
-            if (token.IsCancellationRequested)
-                return new ResultadoPing { Status = StatusMaquina.Aguardando };
-
-            // Passo 2 — ping pelo IP fixo
-            if (!string.IsNullOrWhiteSpace(ip))
-            {
-                var (ok, lat) = await Pingar(ip, token);
-                if (ok) return new ResultadoPing { Status = StatusMaquina.IpAlerta, Latencia = lat };
-            }
-
-            return new ResultadoPing { Status = StatusMaquina.Offline };
+                StatusHostname   = sHost,
+                LatenciaHostname = lHost,
+                StatusIp         = sIp,
+                LatenciaIp       = lIp
+            };
         }
 
-        private static async Task<(bool ok, long lat)> Pingar(string alvo,
-                                                               CancellationToken token)
+        private static async Task<(StatusPing status, long lat)> PingarAlvo(
+            string alvo, CancellationToken token)
         {
+            if (string.IsNullOrWhiteSpace(alvo))
+                return (StatusPing.SemAlvo, 0);
             try
             {
                 using var ping = new Ping();
                 var reply = await ping.SendPingAsync(alvo, TimeoutMs);
                 return reply.Status == IPStatus.Success
-                    ? (true,  reply.RoundtripTime)
-                    : (false, 0);
+                    ? (StatusPing.Online,  reply.RoundtripTime)
+                    : (StatusPing.Offline, 0);
             }
-            catch { return (false, 0); }
+            catch { return (StatusPing.Offline, 0); }
         }
     }
 }

@@ -146,11 +146,9 @@ Cada card exibe uma barra colorida na lateral esquerda indicando o estado da má
 
 O IP é salvo no JSON junto com o hostname. A verificação usa os dois.
 
-**Lógica de verificação (em ordem):**
+**Lógica de verificação:**
 
-1. Tenta ping pelo **hostname** → respondeu: **Online** ✔
-2. Hostname falhou → tenta ping pelo **IP** → respondeu: **IpAlerta** ⚠ (ligada, mas hostname sem resposta)
-3. Ambos falharam: **Offline** ✗
+As duas verificações são **independentes e paralelas** — hostname e IP são pingados ao mesmo tempo, sem que um dependa do outro.
 
 **Estados possíveis:**
 
@@ -171,12 +169,27 @@ O IP é salvo no JSON junto com o hostname. A verificação usa os dois.
 └──┴──────────────────────┘
 ```
 
+A barra lateral é **dividida em duas metades**:
+- Metade **superior** → resultado do ping pelo **hostname**
+- Metade **inferior** → resultado do ping pelo **IP**
+
+Cada metade tem cor independente:
+
 | Cor | Significado |
 |---|---|
-| 🟢 Verde | Online — hostname respondeu ao ping |
-| 🟡 Amarelo | Alerta — hostname sem resposta, mas IP responde (verificar DNS/nome) |
-| 🔴 Vermelho | Offline — nenhum ping respondeu |
-| ⬜ Cinza | Aguardando — ainda não verificado neste ciclo |
+| 🟢 Verde | Ping respondeu |
+| 🔴 Vermelho | Sem resposta |
+| 🟡 Amarelo | Aguardando verificação |
+| ⬜ Cinza | Sem dado cadastrado |
+
+**Combinações:**
+
+| Barra | Diagnóstico |
+|---|---|
+| 🟢 cima + 🟢 baixo | Tudo OK — hostname e IP respondem |
+| 🟢 cima + 🔴 baixo | IP errado no cadastro |
+| 🔴 cima + 🟢 baixo | Hostname com problema (DNS/nome errado) |
+| 🔴 cima + 🔴 baixo | Máquina offline ou ambos com problema |
 
 O ciclo pinga até 5 máquinas em paralelo e aguarda 2 minutos antes de reiniciar.
 É possível forçar uma verificação imediata pelo menu de contexto do card ("Verificar agora").
