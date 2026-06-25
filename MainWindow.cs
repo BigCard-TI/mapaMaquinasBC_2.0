@@ -96,11 +96,21 @@ namespace MapaMaquinas
             splitter.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(4) });
             splitter.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
 
-            // Lateral: abas de empresas
+            // Lateral: abas de empresas + legenda de status
+            var painelLateral = new Grid();
+            painelLateral.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
+            painelLateral.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+
             _tabEmpresas = new TabControl { Margin = new Thickness(0) };
             _tabEmpresas.SelectionChanged += OnEmpresaChanged;
-            Grid.SetColumn(_tabEmpresas, 0);
-            splitter.Children.Add(_tabEmpresas);
+            Grid.SetRow(_tabEmpresas, 0);
+            painelLateral.Children.Add(_tabEmpresas);
+
+            painelLateral.Children.Add(CriarLegenda());
+            Grid.SetRow(painelLateral.Children[1], 1);
+
+            Grid.SetColumn(painelLateral, 0);
+            splitter.Children.Add(painelLateral);
 
             // Divisor
             var gs = new GridSplitter
@@ -156,6 +166,84 @@ namespace MapaMaquinas
             grid.Children.Add(statusBar);
 
             return grid;
+        }
+
+        private UIElement CriarLegenda()
+        {
+            var border = new Border
+            {
+                Background      = new SolidColorBrush(Color.FromRgb(245, 245, 248)),
+                BorderBrush     = new SolidColorBrush(Color.FromRgb(210, 210, 215)),
+                BorderThickness = new Thickness(0, 1, 0, 0),
+                Padding         = new Thickness(10, 8, 10, 10)
+            };
+
+            var stack = new StackPanel { Orientation = Orientation.Vertical };
+
+            // Título
+            stack.Children.Add(new TextBlock
+            {
+                Text       = "STATUS DO PING",
+                FontSize   = 9,
+                FontWeight = FontWeights.Bold,
+                Foreground = new SolidColorBrush(Color.FromRgb(100, 100, 110)),
+                Margin     = new Thickness(0, 0, 0, 6)
+            });
+
+            // Itens da legenda
+            AdicionarItemLegenda(stack, Color.FromRgb(50,  205, 50),  "Online",
+                "Hostname respondeu ao ping");
+            AdicionarItemLegenda(stack, Color.FromRgb(255, 190, 0),   "Alerta DNS",
+                "Hostname falhou, IP respondeu");
+            AdicionarItemLegenda(stack, Color.FromRgb(210, 50,  50),  "Offline",
+                "Nenhum ping respondeu");
+            AdicionarItemLegenda(stack, Color.FromRgb(110, 110, 110), "Aguardando",
+                "Ainda não verificada");
+
+            border.Child = stack;
+            return border;
+        }
+
+        private static void AdicionarItemLegenda(StackPanel parent, Color cor,
+                                                  string titulo, string descricao)
+        {
+            var row = new StackPanel
+            {
+                Orientation = Orientation.Horizontal,
+                Margin      = new Thickness(0, 0, 0, 5)
+            };
+
+            // Barra colorida (replica a barra lateral do card)
+            row.Children.Add(new Border
+            {
+                Width           = 5,
+                Height          = 28,
+                Background      = new SolidColorBrush(cor),
+                CornerRadius    = new CornerRadius(1),
+                Margin          = new Thickness(0, 0, 8, 0),
+                VerticalAlignment = VerticalAlignment.Center
+            });
+
+            // Texto
+            var textos = new StackPanel { Orientation = Orientation.Vertical,
+                                          VerticalAlignment = VerticalAlignment.Center };
+            textos.Children.Add(new TextBlock
+            {
+                Text       = titulo,
+                FontSize   = 10,
+                FontWeight = FontWeights.SemiBold,
+                Foreground = Brushes.Black
+            });
+            textos.Children.Add(new TextBlock
+            {
+                Text       = descricao,
+                FontSize   = 9,
+                Foreground = new SolidColorBrush(Color.FromRgb(90, 90, 100)),
+                TextWrapping = TextWrapping.Wrap
+            });
+            row.Children.Add(textos);
+
+            parent.Children.Add(row);
         }
 
         private Menu CriarMenu()
