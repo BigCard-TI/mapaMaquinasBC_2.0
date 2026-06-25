@@ -8,69 +8,90 @@ namespace MapaMaquinas.Services
 {
     public enum StatusPing { Aguardando, Online, Offline, SemAlvo }
 
-    public class ResultadoDualPing
+    /// <summary>
+    /// Três estados possíveis para o card:
+    ///
+    ///   Online    — ping por nome respondeu → máquina ligada e DNS ok   (barra verde)
+    ///   DnsAlerta — nome falhou, IP respondeu → ligada mas DNS com problema (barra amarela)
+    ///   Offline   — nenhum respondeu → máquina desligada ou inacessível (barra vermelha)
+    ///   Aguardando — ainda não foi verificada neste ciclo                (barra amarela clara)
+    /// </summary>
+    public enum StatusMaquina { Aguardando, Online, DnsAlerta, Offline }
+
+    public class ResultadoPing
     {
-        public StatusPing StatusNome   { get; init; } = StatusPing.Aguardando;
-        public long       LatenciaNome { get; init; }
-        public StatusPing StatusIp     { get; init; } = StatusPing.Aguardando;
-        public long       LatenciaIp   { get; init; }
-        public string     IpResolvido  { get; init; } = "";
-        public bool       IpBatem      { get; init; }
+        public StatusMaquina Status      { get; init; } = StatusMaquina.Aguardando;
+        public string        IpResolvido { get; init; } = "";
+        public long          Latencia    { get; init; }   // ms do ping que respondeu (0 se nenhum)
     }
 
     /// <summary>
-    /// Executa o dual ping (hostname + IP) de uma única máquina.
-    /// Não tem loop — é chamado pelo PingQueue na hora certa.
+    /// Lógica de verificação de uma máquina:
+    ///   1. Tenta ping pelo hostname
+    ///      → respondeu: Online ✔ (mais nada precisa ser feito)
+    ///   2. Se falhou: resolve DNS e tenta ping pelo IP
+    ///      → respondeu: DnsAlerta ⚠ (máquina viva, DNS com problema)
+    ///   3. Se falhou também: Offline ✗
     /// </summary>
     public static class PingWorker
     {
         private const int TimeoutMs = 2000;
 
-        public static async Task<ResultadoDualPing> Executar(string hostname, string ip,
-                                                              CancellationToken token)
+        public static async Task<ResultadoPing> Executar(string hostname,
+                                                          CancellationToken token)
         {
+            if (string.IsNullOrWhiteSpace(hostname))
+                return new ResultadoPing { Status = StatusMaquina.Offline };
+
             if (token.IsCancellationRequested)
-                return new ResultadoDualPing();
+                return new ResultadoPing { Status = StatusMaquina.Aguardando };
 
-            var taskNome = PingarAlvo(string.IsNullOrWhiteSpace(hostname) ? null : hostname, token);
-            var taskIp   = PingarAlvo(string.IsNullOrWhiteSpace(ip)       ? null : ip,       token);
-            var taskDns  = ResolverDns(hostname, token);
+            // ── Passo 1: ping pelo nome ───────────────────────────────────────
+            var (pingNomeOk, latNome) = await PingarAlvo(hostname, token);
 
-            await Task.WhenAll(taskNome, taskIp, taskDns);
-
-            var (sNome, lNome) = taskNome.Result;
-            var (sIp,   lIp)   = taskIp.Result;
-            var ipResolvido     = taskDns.Result;
-
-            bool batem = !string.IsNullOrEmpty(ipResolvido)
-                         && !string.IsNullOrEmpty(ip)
-                         && string.Equals(ipResolvido.Trim(), ip.Trim(),
-                                          StringComparison.OrdinalIgnoreCase);
-
-            return new ResultadoDualPing
+            if (pingNomeOk)
             {
-                StatusNome   = sNome,
-                LatenciaNome = lNome,
-                StatusIp     = sIp,
-                LatenciaIp   = lIp,
-                IpResolvido  = ipResolvido,
-                IpBatem      = batem
+                // Resolve DNS em paralelo para exibir o IP no card (não bloqueia o status)
+                var ip = await ResolverDns(hostname, token);
+                return new ResultadoPing
+                {
+                    Status      = StatusMaquina.Online,
+                    IpResolvido = ip,
+                    Latencia    = latNome
+                };
+            }
+
+            if (token.IsCancellationRequested)
+                return new ResultadoPing { Status = StatusMaquina.Aguardando };
+
+            // ── Passo 2: resolve DNS e pinga pelo IP ──────────────────────────
+            var ipResolvido = await ResolverDns(hostname, token);
+
+            if (string.IsNullOrEmpty(ipResolvido))
+                return new ResultadoPing { Status = StatusMaquina.Offline };
+
+            var (pingIpOk, latIp) = await PingarAlvo(ipResolvido, token);
+
+            return new ResultadoPing
+            {
+                Status      = pingIpOk ? StatusMaquina.DnsAlerta : StatusMaquina.Offline,
+                IpResolvido = ipResolvido,
+                Latencia    = latIp
             };
         }
 
-        private static async Task<(StatusPing, long)> PingarAlvo(string? alvo,
-                                                                   CancellationToken token)
+        private static async Task<(bool ok, long lat)> PingarAlvo(string alvo,
+                                                                    CancellationToken token)
         {
-            if (string.IsNullOrWhiteSpace(alvo)) return (StatusPing.SemAlvo, 0);
             try
             {
                 using var ping = new Ping();
                 var reply = await ping.SendPingAsync(alvo, TimeoutMs);
                 return reply.Status == IPStatus.Success
-                    ? (StatusPing.Online,  reply.RoundtripTime)
-                    : (StatusPing.Offline, 0);
+                    ? (true,  reply.RoundtripTime)
+                    : (false, 0);
             }
-            catch { return (StatusPing.Offline, 0); }
+            catch { return (false, 0); }
         }
 
         private static async Task<string> ResolverDns(string hostname, CancellationToken token)

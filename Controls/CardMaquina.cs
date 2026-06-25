@@ -11,30 +11,40 @@ namespace MapaMaquinas.Controls
 {
     /// <summary>
     /// Card visual de uma máquina no mapa.
-    /// O ping é gerenciado externamente pelo PingQueue — o card apenas exibe o resultado.
+    ///
+    /// Layout:
+    ///   ┌─┬──────────────────────┐
+    ///   │█│ PC-NOME              │   ← hostname
+    ///   │█│ 192.168.0.10  P.5   │   ← IP resolvido via DNS + porta switch
+    ///   │█│ 201                  │   ← ramal (opcional)
+    ///   └─┴──────────────────────┘
+    ///    ↑ barra lateral colorida (verde/vermelho/amarelo = status geral do ping)
+    ///
+    /// O IP nunca vem do JSON — sempre resolvido em tempo real via DNS.
     /// </summary>
     public class CardMaquina : Canvas
     {
         // ── Dimensões ─────────────────────────────────────────────────────────
+        private const double BarraW      = 4;    // largura da barra lateral
         private const double CardWidth   = 74;
-        private const double LinhaAltura = 11;
-        private const double PaddingTopo = 4;
-        private const double PaddingBase = 3;
-        private const double DotR        = 3.5;
-        private const double DotX        = CardWidth - DotR - 3;
+        private const double LinhaH      = 11;
+        private const double PadTop      = 4;
+        private const double PadBase     = 3;
+        private const double PadLeft     = BarraW + 4;  // texto começa após a barra
 
-        // ── Highlight ─────────────────────────────────────────────────────────
-        private static readonly Color HighlightVivo  = Color.FromRgb(255, 0,   0);
-        private static readonly Color HighlightMeio  = Color.FromRgb(255, 96,  0);
-        private static readonly Color HighlightHalo  = Color.FromRgb(255, 192, 0);
-        private static readonly Color HighlightFraco = Color.FromRgb(192, 128, 0);
-        private const int HighlightIntervalo = 300;
+        // ── Cores de status ───────────────────────────────────────────────────
+        private static readonly Color CorOnline   = Color.FromRgb(50,  205, 50);
+        private static readonly Color CorOffline  = Color.FromRgb(210, 50,  50);
+        private static readonly Color CorAguard   = Color.FromRgb(255, 190, 0);
+        private static readonly Color CorSemAlvo  = Color.FromRgb(110, 110, 110);
+        private static readonly Color CorDiverg   = Color.FromRgb(255, 140, 0);  // laranja
 
-        // ── Cores de ping ─────────────────────────────────────────────────────
-        private static readonly Color CorOk      = Color.FromRgb(50,  205, 50);
-        private static readonly Color CorErro    = Color.FromRgb(220, 50,  50);
-        private static readonly Color CorAguard  = Color.FromRgb(255, 200, 0);
-        private static readonly Color CorSemAlvo = Color.FromRgb(110, 110, 110);
+        // ── Highlight de busca ────────────────────────────────────────────────
+        private static readonly Color HlVivo  = Color.FromRgb(255, 0,   0);
+        private static readonly Color HlMeio  = Color.FromRgb(255, 96,  0);
+        private static readonly Color HlHalo  = Color.FromRgb(255, 192, 0);
+        private static readonly Color HlFraco = Color.FromRgb(192, 128, 0);
+        private const int HlIntervalo = 300;
 
         // ── Estado ────────────────────────────────────────────────────────────
         private Maquina? _maquina;
@@ -45,10 +55,10 @@ namespace MapaMaquinas.Controls
         private bool     _blinkState;
         private DispatcherTimer? _blinkTimer;
 
-        // ── Resultado do ping (atualizado externamente pelo PingQueue) ─────────
-        private ResultadoDualPing _ping = new();
+        // Resultado do ping — atualizado pelo PingQueue via AtualizarResultadoPing()
+        private ResultadoPing _ping = new();
 
-        // Callback para "verificar agora" — preenchido pelo MainWindow
+        // Callback para "Verificar agora" — wired pelo MainWindow
         public Action? OnPingarAgora { get; set; }
 
         // ── Eventos ───────────────────────────────────────────────────────────
@@ -79,7 +89,7 @@ namespace MapaMaquinas.Controls
             Cursor   = Cursors.SizeAll;
 
             _blinkTimer = new DispatcherTimer
-                { Interval = TimeSpan.FromMilliseconds(HighlightIntervalo) };
+                { Interval = TimeSpan.FromMilliseconds(HlIntervalo) };
             _blinkTimer.Tick += (_, _) => { _blinkState = !_blinkState; InvalidateVisual(); };
 
             CriarMenuContexto();
@@ -113,20 +123,18 @@ namespace MapaMaquinas.Controls
             ContextMenu = menu;
         }
 
-        // ── API de ping (chamada pelo PingQueue) ──────────────────────────────
+        // ── API de ping ───────────────────────────────────────────────────────
 
-        /// <summary>Recebe o resultado do PingQueue e redesenha o card.</summary>
-        public void AtualizarResultadoPing(ResultadoDualPing resultado)
+        public void AtualizarResultadoPing(ResultadoPing resultado)
         {
             _ping = resultado;
             AtualizarTooltip();
             InvalidateVisual();
         }
 
-        /// <summary>Reseta o card para estado "Aguardando" (ex: ao trocar de empresa).</summary>
         public void ResetarPing()
         {
-            _ping = new ResultadoDualPing();
+            _ping = new ResultadoPing();
             AtualizarTooltip();
             InvalidateVisual();
         }
@@ -137,7 +145,7 @@ namespace MapaMaquinas.Controls
             if (_maquina == null) return;
             Width  = CardWidth;
             int linhas = string.IsNullOrEmpty(_maquina.Ramal) ? 2 : 3;
-            Height = PaddingTopo + linhas * LinhaAltura + PaddingBase;
+            Height = PadTop + linhas * LinhaH + PadBase;
             AtualizarTooltip();
             InvalidateVisual();
         }
@@ -146,29 +154,29 @@ namespace MapaMaquinas.Controls
         {
             if (_maquina == null) return;
 
-            string Str(StatusPing s, long lat) => s switch
-            {
-                StatusPing.Online     => $"OK ({lat} ms)",
-                StatusPing.Offline    => "Sem resposta",
-                StatusPing.Aguardando => "Aguardando...",
-                _                     => "—"
-            };
+            var ipLinha = string.IsNullOrEmpty(_ping.IpResolvido)
+                ? "(resolvendo...)"
+                : _ping.IpResolvido;
 
-            var dnsInfo = string.IsNullOrEmpty(_ping.IpResolvido) ? "" :
-                $"\n  DNS: {_ping.IpResolvido}" +
-                (_ping.IpBatem ? " ✔ bate com o cadastro" : " ✘ diverge do cadastro");
+            var statusDesc = _ping.Status switch
+            {
+                StatusMaquina.Online    => $"Online ({_ping.Latencia} ms)",
+                StatusMaquina.DnsAlerta => $"Ligada via IP ({_ping.Latencia} ms) — nome não responde",
+                StatusMaquina.Offline   => "Offline — sem resposta",
+                _                       => "Aguardando verificação..."
+            };
 
             ToolTip = new ToolTip
             {
                 Content =
                     $"{_maquina.Hostname}\n" +
-                    $"──────────────────────\n" +
-                    $"● Nome : {Str(_ping.StatusNome, _ping.LatenciaNome)}{dnsInfo}\n" +
-                    $"● IP   : {_maquina.Ip}  {Str(_ping.StatusIp, _ping.LatenciaIp)}\n" +
-                    $"──────────────────────\n" +
+                    $"──────────────────────────\n" +
+                    $"Status : {statusDesc}\n" +
+                    $"IP     : {ipLinha}\n" +
+                    $"──────────────────────────\n" +
                     $"Tipo: {_maquina.Tipo}   Porta SW: {_maquina.PortaSwitch}\n" +
                     $"CPU: {_maquina.Processador}\n" +
-                    $"RAM: {_maquina.Ram}  HD: {_maquina.Storage}" +
+                    $"RAM: {_maquina.Ram}   HD: {_maquina.Storage}" +
                     (string.IsNullOrEmpty(_maquina.Ramal) ? "" : $"\nRamal: {_maquina.Ramal}")
             };
             ToolTipService.SetShowDuration(this, 60000);
@@ -195,79 +203,63 @@ namespace MapaMaquinas.Controls
             var corFundo = _setor?.CorAsColor() ?? Color.FromRgb(136, 136, 136);
             var rect     = new Rect(0, 0, Width, Height);
 
+            // ── Fundo ─────────────────────────────────────────────────────────
             dc.DrawRectangle(new SolidColorBrush(corFundo), null, rect);
 
+            // ── Barra lateral colorida (status geral do ping) ─────────────────
+            var corBarra = _ping.Status switch
+            {
+                StatusMaquina.Online     => CorOnline,
+                StatusMaquina.DnsAlerta  => CorAguard,   // amarelo: viva mas DNS problemático
+                StatusMaquina.Offline    => CorOffline,
+                _                        => CorSemAlvo   // Aguardando
+            };
+            dc.DrawRectangle(
+                new SolidColorBrush(corBarra),
+                null,
+                new Rect(0, 0, BarraW, Height));
+
+            // ── Borda externa / highlight ─────────────────────────────────────
             if (_highlight && _blinkState)
             {
-                dc.DrawRectangle(null, new Pen(new SolidColorBrush(HighlightHalo), 1), Inflated(rect, 4));
-                dc.DrawRectangle(null, new Pen(new SolidColorBrush(HighlightMeio), 1), Inflated(rect, 2));
-                dc.DrawRectangle(null, new Pen(new SolidColorBrush(HighlightVivo), 4), Inflated(rect, 1));
+                dc.DrawRectangle(null, new Pen(new SolidColorBrush(HlHalo),  1), Inflated(rect, 4));
+                dc.DrawRectangle(null, new Pen(new SolidColorBrush(HlMeio),  1), Inflated(rect, 2));
+                dc.DrawRectangle(null, new Pen(new SolidColorBrush(HlVivo),  4), Inflated(rect, 1));
             }
             else if (_highlight)
             {
-                dc.DrawRectangle(null, new Pen(new SolidColorBrush(HighlightFraco), 1), Inflated(rect, 1));
+                dc.DrawRectangle(null, new Pen(new SolidColorBrush(HlFraco), 1), Inflated(rect, 1));
             }
             else
             {
-                dc.DrawRectangle(null, new Pen(new SolidColorBrush(DarkenColor(corFundo, 40)), 1), rect);
-            }
-
-            // Linha 1 — Hostname + status DNS
-            DesenharLinha(dc, _maquina.Hostname, bold: true, y: PaddingTopo, _ping.StatusNome);
-
-            // Linha 2 — IP/Porta + status ICMP
-            double y2 = PaddingTopo + LinhaAltura;
-            var ipTxt = UltimoOcteto(_maquina.Ip);
-            if (!string.IsNullOrEmpty(_maquina.PortaSwitch)) ipTxt += "-" + _maquina.PortaSwitch;
-            DesenharLinha(dc, ipTxt, bold: false, y: y2, _ping.StatusIp);
-
-            // Linha 3 — Ramal (sem bolinha)
-            if (!string.IsNullOrEmpty(_maquina.Ramal))
-            {
-                double y3 = y2 + LinhaAltura;
-                var ft = MakeText(_maquina.Ramal, 6.5, bold: true);
-                double cx = (CardWidth - DotR * 2 - 4) / 2;
-                dc.DrawText(ft, new Point(cx - ft.Width / 2, y3 + (LinhaAltura - ft.Height) / 2));
-            }
-
-            // Borda laranja: ambos online mas IPs divergem
-            if (_ping.StatusNome == StatusPing.Online &&
-                _ping.StatusIp   == StatusPing.Online &&
-                !_ping.IpBatem   &&
-                !string.IsNullOrEmpty(_ping.IpResolvido))
-            {
                 dc.DrawRectangle(null,
-                    new Pen(new SolidColorBrush(Color.FromRgb(255, 160, 0)), 1.5),
-                    Inflated(rect, 1));
+                    new Pen(new SolidColorBrush(DarkenColor(corFundo, 40)), 1), rect);
             }
+
+            // ── Textos ────────────────────────────────────────────────────────
+            double y = PadTop;
+
+            // Linha 1 — Hostname (bold)
+            DesenharTexto(dc, _maquina.Hostname, bold: true, y: y);
+            y += LinhaH;
+
+            // Linha 2 — IP resolvido via DNS + porta switch
+            var ipTxt = string.IsNullOrEmpty(_ping.IpResolvido) ? "..." : _ping.IpResolvido;
+            if (!string.IsNullOrEmpty(_maquina.PortaSwitch)) ipTxt += "  P." + _maquina.PortaSwitch;
+            DesenharTexto(dc, ipTxt, bold: false, y: y);
+            y += LinhaH;
+
+            // Linha 3 — Ramal (opcional)
+            if (!string.IsNullOrEmpty(_maquina.Ramal))
+                DesenharTexto(dc, _maquina.Ramal, bold: true, y: y);
         }
 
-        private void DesenharLinha(DrawingContext dc, string texto, bool bold,
-                                   double y, StatusPing status)
+        private void DesenharTexto(DrawingContext dc, string texto, bool bold, double y)
         {
-            double areaTexto = CardWidth - DotR * 2 - 8;
+            double areaW = CardWidth - PadLeft - 3;
             var ft = MakeText(texto, 6.5, bold);
-            double tx = Math.Max(2, areaTexto / 2 - ft.Width / 2);
-            dc.DrawText(ft, new Point(tx, y + (LinhaAltura - ft.Height) / 2));
-            DesenharDot(dc, status, DotX, y + LinhaAltura / 2);
-        }
-
-        private static void DesenharDot(DrawingContext dc, StatusPing status, double cx, double cy)
-        {
-            var cor = status switch
-            {
-                StatusPing.Online     => CorOk,
-                StatusPing.Offline    => CorErro,
-                StatusPing.Aguardando => CorAguard,
-                _                     => CorSemAlvo
-            };
-            dc.DrawEllipse(new SolidColorBrush(Color.FromArgb(100, 0, 0, 0)),
-                null, new Point(cx, cy), DotR + 1, DotR + 1);
-            dc.DrawEllipse(new SolidColorBrush(cor),
-                null, new Point(cx, cy), DotR, DotR);
-            if (status == StatusPing.Online)
-                dc.DrawEllipse(new SolidColorBrush(Color.FromArgb(170, 255, 255, 255)),
-                    null, new Point(cx - 1.2, cy - 1.2), 1.5, 1.5);
+            double tx = PadLeft + Math.Max(0, areaW / 2 - ft.Width / 2);
+            dc.DrawText(ft, new Point(tx, y + (LinhaH - ft.Height) / 2));
         }
 
         // ── Helpers ───────────────────────────────────────────────────────────
@@ -290,13 +282,6 @@ namespace MapaMaquinas.Controls
                 (byte)Math.Max(0, c.R - amount),
                 (byte)Math.Max(0, c.G - amount),
                 (byte)Math.Max(0, c.B - amount));
-
-        private static string UltimoOcteto(string ip)
-        {
-            if (string.IsNullOrEmpty(ip)) return "";
-            var idx = ip.LastIndexOf('.');
-            return idx >= 0 ? ip[(idx + 1)..] : ip;
-        }
 
         // ── Drag and drop ─────────────────────────────────────────────────────
         protected override void OnMouseLeftButtonDown(MouseButtonEventArgs e)

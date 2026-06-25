@@ -140,20 +140,48 @@ Tipos de máquina aceitos: `desktop`, `notebook`, `mac`, `servidor`, `impressora
 
 ---
 
-## Indicador de ping
+## Indicador de status (barra lateral)
 
-Cada card exibe uma bolinha no canto superior direito:
+Cada card exibe uma barra colorida na lateral esquerda indicando o estado da máquina na rede.
+
+O IP nunca é salvo no JSON — é sempre resolvido via DNS em tempo real a partir do hostname.
+
+**Lógica de verificação (em ordem):**
+
+1. Tenta ping pelo **hostname** → respondeu: **Online** ✔
+2. Se falhou: resolve DNS e tenta ping pelo **IP** → respondeu: **DNS com problema** ⚠
+3. Se falhou também: **Offline** ✗
+
+**Estados possíveis:**
+
+```
+┌──┬──────────────────────┐
+│🟢│ PC-FIN01             │  → ping por nome OK
+│  │ 192.168.0.10   P.5  │
+└──┴──────────────────────┘
+
+┌──┬──────────────────────┐
+│🟡│ PC-FIN01             │  → nome falhou, IP respondeu (DNS com problema)
+│  │ 192.168.0.10   P.5  │
+└──┴──────────────────────┘
+
+┌──┬──────────────────────┐
+│🔴│ PC-FIN01             │  → nenhum respondeu, máquina offline
+│  │ ...            P.5  │
+└──┴──────────────────────┘
+```
 
 | Cor | Significado |
 |---|---|
-| 🟢 Verde | Online (exibe latência em ms) |
-| 🔴 Vermelho | Sem resposta (ICMP bloqueado ou host offline) |
-| 🟡 Amarelo | Aguardando primeiro resultado |
-| ⚫ Cinza | Sem IP cadastrado |
+| 🟢 Verde | Online — hostname respondeu ao ping |
+| 🟡 Amarelo | Alerta — hostname não responde mas IP sim (verificar DNS) |
+| 🔴 Vermelho | Offline — nenhum ping respondeu |
+| ⬜ Cinza | Aguardando — ainda não verificado neste ciclo |
 
-O ping é disparado automaticamente ao carregar o mapa e repetido a cada 30 segundos. É possível forçar um ping imediato pelo menu de contexto do card.
+O ciclo pinga até 5 máquinas em paralelo e aguarda 2 minutos antes de reiniciar.
+É possível forçar uma verificação imediata pelo menu de contexto do card ("Verificar agora").
 
-> **Obs:** máquinas com firewall bloqueando ICMP aparecerão como offline mesmo que estejam acessíveis na rede. Isso é uma limitação do protocolo, não do sistema.
+> **Obs:** máquinas com firewall bloqueando ICMP aparecerão como offline mesmo acessíveis. Limitação do protocolo ICMP, não do sistema.
 
 ---
 

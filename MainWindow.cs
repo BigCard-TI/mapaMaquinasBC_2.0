@@ -595,7 +595,6 @@ namespace MapaMaquinas
                 var m = card.Maquina;
                 var hit =
                     m.Hostname.Contains(termo, StringComparison.OrdinalIgnoreCase) ||
-                    m.Ip.Contains(termo, StringComparison.OrdinalIgnoreCase) ||
                     m.Ramal.Contains(termo, StringComparison.OrdinalIgnoreCase) ||
                     m.PortaSwitch.Contains(termo, StringComparison.OrdinalIgnoreCase);
 

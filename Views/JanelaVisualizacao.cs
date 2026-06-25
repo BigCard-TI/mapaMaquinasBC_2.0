@@ -82,7 +82,7 @@ namespace MapaMaquinas.Views
             }
 
             AddLinha("Hostname",     maquina.Hostname,    destaque: true);
-            AddLinha("IP",           maquina.Ip,          destaque: true);
+            AddLinha("IP",           "(resolvido via DNS em tempo real)", destaque: false);
             if (!string.IsNullOrEmpty(maquina.Ramal))
                 AddLinha("Ramal",    maquina.Ramal,       destaque: true);
             AddLinha("Tipo",         TipoAmigavel(maquina.Tipo));

@@ -16,7 +16,6 @@ namespace MapaMaquinas.Views
         private TextBox   _edProcessador = null!;
         private TextBox   _edRam         = null!;
         private TextBox   _edStorage     = null!;
-        private TextBox   _edIp          = null!;
         private TextBox   _edPorta       = null!;
         private TextBox   _edRamal       = null!;
         private TextBox   _edObs         = null!;
@@ -52,7 +51,6 @@ namespace MapaMaquinas.Views
             _edProcessador = AddCampo(stack, "Processador");
             _edRam         = AddCampo(stack, "RAM");
             _edStorage     = AddCampo(stack, "Storage");
-            _edIp          = AddCampo(stack, "IP");
             _edPorta       = AddCampo(stack, "Porta Switch");
             _edRamal       = AddCampo(stack, "Ramal");
             _edObs         = AddCampo(stack, "Observações");
@@ -124,7 +122,6 @@ namespace MapaMaquinas.Views
             _edProcessador.Text = _maquina.Processador;
             _edRam.Text         = _maquina.Ram;
             _edStorage.Text     = _maquina.Storage;
-            _edIp.Text          = _maquina.Ip;
             _edPorta.Text       = _maquina.PortaSwitch;
             _edRamal.Text       = _maquina.Ramal;
             _edObs.Text         = _maquina.Observacoes;
@@ -145,17 +142,6 @@ namespace MapaMaquinas.Views
             _cbTipo.SelectedIndex = idx >= 0 ? idx : 0;
         }
 
-        private string IpDuplicado(string ip)
-        {
-            if (string.IsNullOrWhiteSpace(ip)) return "";
-            foreach (var m in _empresa.Maquinas)
-            {
-                if (_maquina != null && string.Equals(m.Id, _maquina.Id, StringComparison.OrdinalIgnoreCase)) continue;
-                if (string.Equals(m.Ip.Trim(), ip.Trim(), StringComparison.OrdinalIgnoreCase))
-                    return m.Hostname;
-            }
-            return "";
-        }
 
         private void OnSalvar(object sender, RoutedEventArgs e)
         {
@@ -173,14 +159,6 @@ namespace MapaMaquinas.Views
                 return;
             }
 
-            var conflito = IpDuplicado(_edIp.Text);
-            if (!string.IsNullOrEmpty(conflito))
-            {
-                var resp = MessageBox.Show(
-                    $"Atenção: o IP \"{_edIp.Text.Trim()}\" já está em uso pela máquina \"{conflito}\".\n\nDeseja salvar mesmo assim?",
-                    "IP duplicado", MessageBoxButton.YesNo, MessageBoxImage.Warning);
-                if (resp == MessageBoxResult.No) { _edIp.Focus(); return; }
-            }
 
             _maquina ??= new Maquina();
 
@@ -191,7 +169,6 @@ namespace MapaMaquinas.Views
             _maquina.Processador = _edProcessador.Text;
             _maquina.Ram         = _edRam.Text;
             _maquina.Storage     = _edStorage.Text;
-            _maquina.Ip          = _edIp.Text;
             _maquina.PortaSwitch = _edPorta.Text;
             _maquina.Ramal       = _edRamal.Text;
             _maquina.Observacoes = _edObs.Text;
