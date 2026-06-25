@@ -407,7 +407,7 @@ namespace MapaMaquinas
             if (_mapaCanvas.Width < 200)  _mapaCanvas.Width  = 2000;
             if (_mapaCanvas.Height < 200) _mapaCanvas.Height = 1200;
 
-            // Cards de máquinas — com resolução automática de sobreposição
+            // Cards de máquinas — posicionados exatamente onde estão salvos no JSON
             foreach (var m in empresa.Maquinas)
             {
                 var setor = empresa.BuscarSetor(m.SetorId);
@@ -417,17 +417,8 @@ namespace MapaMaquinas
                 card.Visualizar += (s, _) => VisualizarMaquina(card);
                 card.MouseLeftButtonUp += (_, _) => MarcarAlterado();
 
-                // Resolve sobreposição antes de posicionar
-                var pos = ResolverPosicao(m.PosX, m.PosY, card.Width, card.Height);
-                Canvas.SetLeft(card, pos.X);
-                Canvas.SetTop(card, pos.Y);
-
-                // Atualiza modelo se a posição mudou (evita sobrepor ao salvar)
-                if ((int)pos.X != m.PosX || (int)pos.Y != m.PosY)
-                {
-                    m.PosX = (int)pos.X;
-                    m.PosY = (int)pos.Y;
-                }
+                Canvas.SetLeft(card, m.PosX);
+                Canvas.SetTop(card, m.PosY);
 
                 _mapaCanvas.Children.Add(card);
                 _cards.Add(card);
@@ -455,63 +446,6 @@ namespace MapaMaquinas
             }
 
             AtualizarStatus($"{empresa.Nome}  |  {empresa.Maquinas.Count} máquina(s)  |  {empresa.Portas.Count} porta(s)");
-        }
-
-        /// <summary>
-        /// Retorna uma posição livre para um card de tamanho (w × h) a partir de (x, y).
-        /// Desloca para baixo/direita até não colidir com nenhum card já posicionado.
-        /// Garante que cards com PosX=0 e PosY=0 (nunca posicionados) também sejam espalhados.
-        /// </summary>
-        private Point ResolverPosicao(int x, int y, double w, double h)
-        {
-            const int Margem     = 4;   // espaço mínimo entre cards
-            const int MaxTentativas = 500;
-
-            double cx = Math.Max(0, x);
-            double cy = Math.Max(0, y);
-
-            // Cards nunca posicionados (0,0) são distribuídos em grade automática
-            if (x == 0 && y == 0)
-            {
-                int idx = _cards.Count;
-                int col = idx % 10;
-                int row = idx / 10;
-                cx = col * (w + Margem * 2) + 10;
-                cy = row * (h + Margem * 2) + 10;
-            }
-
-            bool Colide(double tx, double ty)
-            {
-                var testeRect = new Rect(tx, ty, w, h);
-                foreach (var c in _cards)
-                {
-                    var cRect = new Rect(
-                        Canvas.GetLeft(c), Canvas.GetTop(c),
-                        c.Width, c.Height);
-                    cRect.Inflate(Margem, Margem);
-                    if (testeRect.IntersectsWith(cRect)) return true;
-                }
-                return false;
-            }
-
-            int tentativa = 0;
-            double ox = cx, oy = cy;   // posição original
-
-            while (Colide(cx, cy) && tentativa < MaxTentativas)
-            {
-                cx += w + Margem;
-
-                // Quebra de linha: volta ao X original, desce uma linha
-                if (cx + w > _mapaCanvas.Width - 10)
-                {
-                    cx  = ox;
-                    oy += h + Margem;
-                    cy  = oy;
-                }
-                tentativa++;
-            }
-
-            return new Point(cx, cy);
         }
 
         private void LimparCards()
