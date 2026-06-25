@@ -1,94 +1,90 @@
 using System;
+using System.Net;
 using System.Net.NetworkInformation;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows.Threading;
 
 namespace MapaMaquinas.Services
 {
-    public enum StatusPing { Aguardando, Online, Offline, SemIp }
+    public enum StatusPing { Aguardando, Online, Offline, SemAlvo }
 
-    public class ResultadoPing
+    public class ResultadoDualPing
     {
-        public StatusPing Status  { get; init; }
-        public long       Latencia { get; init; }   // ms; 0 se offline
+        public StatusPing StatusNome   { get; init; } = StatusPing.Aguardando;
+        public long       LatenciaNome { get; init; }
+        public StatusPing StatusIp     { get; init; } = StatusPing.Aguardando;
+        public long       LatenciaIp   { get; init; }
+        public string     IpResolvido  { get; init; } = "";
+        public bool       IpBatem      { get; init; }
     }
 
     /// <summary>
-    /// Pinga um IP em loop com intervalo configurável.
-    /// Chama o callback no Dispatcher da UI ao obter resultado.
+    /// Executa o dual ping (hostname + IP) de uma única máquina.
+    /// Não tem loop — é chamado pelo PingQueue na hora certa.
     /// </summary>
-    public class PingService : IDisposable
+    public static class PingWorker
     {
-        private readonly string     _ip;
-        private readonly Dispatcher _dispatcher;
-        private readonly Action<ResultadoPing> _callback;
-        private CancellationTokenSource _cts = new();
+        private const int TimeoutMs = 2000;
 
-        public static readonly TimeSpan IntervaloDefault = TimeSpan.FromSeconds(30);
-        public static TimeSpan Intervalo { get; set; } = IntervaloDefault;
-
-        public PingService(string ip, Dispatcher dispatcher, Action<ResultadoPing> callback)
+        public static async Task<ResultadoDualPing> Executar(string hostname, string ip,
+                                                              CancellationToken token)
         {
-            _ip         = ip;
-            _dispatcher = dispatcher;
-            _callback   = callback;
+            if (token.IsCancellationRequested)
+                return new ResultadoDualPing();
+
+            var taskNome = PingarAlvo(string.IsNullOrWhiteSpace(hostname) ? null : hostname, token);
+            var taskIp   = PingarAlvo(string.IsNullOrWhiteSpace(ip)       ? null : ip,       token);
+            var taskDns  = ResolverDns(hostname, token);
+
+            await Task.WhenAll(taskNome, taskIp, taskDns);
+
+            var (sNome, lNome) = taskNome.Result;
+            var (sIp,   lIp)   = taskIp.Result;
+            var ipResolvido     = taskDns.Result;
+
+            bool batem = !string.IsNullOrEmpty(ipResolvido)
+                         && !string.IsNullOrEmpty(ip)
+                         && string.Equals(ipResolvido.Trim(), ip.Trim(),
+                                          StringComparison.OrdinalIgnoreCase);
+
+            return new ResultadoDualPing
+            {
+                StatusNome   = sNome,
+                LatenciaNome = lNome,
+                StatusIp     = sIp,
+                LatenciaIp   = lIp,
+                IpResolvido  = ipResolvido,
+                IpBatem      = batem
+            };
         }
 
-        /// <summary>Inicia o loop de ping em uma Task separada.</summary>
-        public void Iniciar()
+        private static async Task<(StatusPing, long)> PingarAlvo(string? alvo,
+                                                                   CancellationToken token)
         {
-            if (string.IsNullOrWhiteSpace(_ip))
-            {
-                _dispatcher.Invoke(() => _callback(new ResultadoPing { Status = StatusPing.SemIp }));
-                return;
-            }
-
-            _cts = new CancellationTokenSource();
-            var token = _cts.Token;
-
-            Task.Run(async () =>
-            {
-                // Primeiro ping imediato
-                await PingarENotificar(token);
-
-                while (!token.IsCancellationRequested)
-                {
-                    try
-                    {
-                        await Task.Delay(Intervalo, token);
-                        await PingarENotificar(token);
-                    }
-                    catch (TaskCanceledException) { break; }
-                }
-            }, token);
-        }
-
-        private async Task PingarENotificar(CancellationToken token)
-        {
-            if (token.IsCancellationRequested) return;
-
-            ResultadoPing resultado;
+            if (string.IsNullOrWhiteSpace(alvo)) return (StatusPing.SemAlvo, 0);
             try
             {
                 using var ping = new Ping();
-                var reply = await ping.SendPingAsync(_ip, 1500);
-                resultado = reply.Status == IPStatus.Success
-                    ? new ResultadoPing { Status = StatusPing.Online,  Latencia = reply.RoundtripTime }
-                    : new ResultadoPing { Status = StatusPing.Offline, Latencia = 0 };
+                var reply = await ping.SendPingAsync(alvo, TimeoutMs);
+                return reply.Status == IPStatus.Success
+                    ? (StatusPing.Online,  reply.RoundtripTime)
+                    : (StatusPing.Offline, 0);
             }
-            catch
-            {
-                resultado = new ResultadoPing { Status = StatusPing.Offline, Latencia = 0 };
-            }
-
-            if (!token.IsCancellationRequested)
-                _dispatcher.Invoke(() => _callback(resultado));
+            catch { return (StatusPing.Offline, 0); }
         }
 
-        /// <summary>Para o loop e libera o CancellationToken.</summary>
-        public void Parar() => _cts.Cancel();
-
-        public void Dispose() => Parar();
+        private static async Task<string> ResolverDns(string hostname, CancellationToken token)
+        {
+            if (string.IsNullOrWhiteSpace(hostname)) return "";
+            try
+            {
+                var entry = await Dns.GetHostEntryAsync(hostname);
+                foreach (var addr in entry.AddressList)
+                    if (addr.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
+                        return addr.ToString();
+                return entry.AddressList.Length > 0 ? entry.AddressList[0].ToString() : "";
+            }
+            catch { return ""; }
+        }
     }
 }

@@ -9,6 +9,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using Microsoft.Win32;
 using MapaMaquinas.Controls;
+using MapaMaquinas.Services;
 using MapaMaquinas.Models;
 using MapaMaquinas.Services;
 using MapaMaquinas.Views;
@@ -40,6 +41,9 @@ namespace MapaMaquinas
         private readonly List<CardPorta>   _cardsPorta = new();
         private readonly List<CardMaquina> _highlight  = new();
 
+        // ── Fila de ping ──────────────────────────────────────────────────────
+        private PingQueue? _pingQueue;
+
         // ── Zoom ──────────────────────────────────────────────────────────────
         private double         _escala         = 1.0;
         private const double   EscalaMin       = 0.25;
@@ -61,6 +65,9 @@ namespace MapaMaquinas
             WindowStartupLocation = WindowStartupLocation.CenterScreen;
 
             Content = CriarLayout();
+            _pingQueue = new PingQueue(Dispatcher);
+            _pingQueue.ProgressoAtualizado += OnPingProgresso;
+            _pingQueue.CicloCompleto       += OnPingCicloCompleto;
             Loaded += OnLoaded;
         }
 
@@ -400,7 +407,7 @@ namespace MapaMaquinas
             if (_mapaCanvas.Width < 200)  _mapaCanvas.Width  = 2000;
             if (_mapaCanvas.Height < 200) _mapaCanvas.Height = 1200;
 
-            // Cards de máquinas
+            // Cards de máquinas — com resolução automática de sobreposição
             foreach (var m in empresa.Maquinas)
             {
                 var setor = empresa.BuscarSetor(m.SetorId);
@@ -410,11 +417,28 @@ namespace MapaMaquinas
                 card.Visualizar += (s, _) => VisualizarMaquina(card);
                 card.MouseLeftButtonUp += (_, _) => MarcarAlterado();
 
-                Canvas.SetLeft(card, m.PosX);
-                Canvas.SetTop(card, m.PosY);
+                // Resolve sobreposição antes de posicionar
+                var pos = ResolverPosicao(m.PosX, m.PosY, card.Width, card.Height);
+                Canvas.SetLeft(card, pos.X);
+                Canvas.SetTop(card, pos.Y);
+
+                // Atualiza modelo se a posição mudou (evita sobrepor ao salvar)
+                if ((int)pos.X != m.PosX || (int)pos.Y != m.PosY)
+                {
+                    m.PosX = (int)pos.X;
+                    m.PosY = (int)pos.Y;
+                }
+
                 _mapaCanvas.Children.Add(card);
                 _cards.Add(card);
+
+                // Registra na fila de ping e conecta o "Verificar agora"
+                _pingQueue!.AdicionarCard(card);
+                card.OnPingarAgora = () => _pingQueue.PingarAgora(card);
             }
+
+            // Inicia a fila: pinga uma máquina por vez, aguarda 2 min entre ciclos
+            _pingQueue!.Iniciar(_cards);
 
             // Cards de portas
             foreach (var p in empresa.Portas)
@@ -433,10 +457,67 @@ namespace MapaMaquinas
             AtualizarStatus($"{empresa.Nome}  |  {empresa.Maquinas.Count} máquina(s)  |  {empresa.Portas.Count} porta(s)");
         }
 
+        /// <summary>
+        /// Retorna uma posição livre para um card de tamanho (w × h) a partir de (x, y).
+        /// Desloca para baixo/direita até não colidir com nenhum card já posicionado.
+        /// Garante que cards com PosX=0 e PosY=0 (nunca posicionados) também sejam espalhados.
+        /// </summary>
+        private Point ResolverPosicao(int x, int y, double w, double h)
+        {
+            const int Margem     = 4;   // espaço mínimo entre cards
+            const int MaxTentativas = 500;
+
+            double cx = Math.Max(0, x);
+            double cy = Math.Max(0, y);
+
+            // Cards nunca posicionados (0,0) são distribuídos em grade automática
+            if (x == 0 && y == 0)
+            {
+                int idx = _cards.Count;
+                int col = idx % 10;
+                int row = idx / 10;
+                cx = col * (w + Margem * 2) + 10;
+                cy = row * (h + Margem * 2) + 10;
+            }
+
+            bool Colide(double tx, double ty)
+            {
+                var testeRect = new Rect(tx, ty, w, h);
+                foreach (var c in _cards)
+                {
+                    var cRect = new Rect(
+                        Canvas.GetLeft(c), Canvas.GetTop(c),
+                        c.Width, c.Height);
+                    cRect.Inflate(Margem, Margem);
+                    if (testeRect.IntersectsWith(cRect)) return true;
+                }
+                return false;
+            }
+
+            int tentativa = 0;
+            double ox = cx, oy = cy;   // posição original
+
+            while (Colide(cx, cy) && tentativa < MaxTentativas)
+            {
+                cx += w + Margem;
+
+                // Quebra de linha: volta ao X original, desce uma linha
+                if (cx + w > _mapaCanvas.Width - 10)
+                {
+                    cx  = ox;
+                    oy += h + Margem;
+                    cy  = oy;
+                }
+                tentativa++;
+            }
+
+            return new Point(cx, cy);
+        }
+
         private void LimparCards()
         {
-            // Para todos os pings antes de descartar os cards
-            foreach (var c in _cards) c.PararPing();
+            // Para a fila centralizada antes de descartar os cards
+            _pingQueue?.Parar();
 
             foreach (var c in _cards)      _mapaCanvas.Children.Remove(c);
             foreach (var c in _cardsPorta) _mapaCanvas.Children.Remove(c);
@@ -490,6 +571,7 @@ namespace MapaMaquinas
             if (MessageBox.Show($"Remover a máquina \"{card.Maquina.Hostname}\"?", "Confirmar",
                 MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes) return;
 
+            _pingQueue?.RemoverCard(card);
             _empresaAtual?.Maquinas.Remove(card.Maquina);
             _mapaCanvas.Children.Remove(card);
             _cards.Remove(card);
@@ -746,6 +828,22 @@ namespace MapaMaquinas
             _lblZoom.Text = "100%";
         }
 
+        // ── Callbacks do PingQueue ────────────────────────────────────────────
+        private void OnPingProgresso(int atual, int total)
+        {
+            if (atual == 0)
+                AtualizarStatus(_lblStatus.Text.Split('|')[0].TrimEnd() +
+                    $"  |  Ping: aguardando próximo ciclo (2 min)");
+            else
+                AtualizarStatus(_lblStatus.Text.Split('|')[0].TrimEnd() +
+                    $"  |  Ping: verificando {atual}/{total}...");
+        }
+
+        private void OnPingCicloCompleto()
+        {
+            // Nada especial — o progresso já foi resetado para "aguardando"
+        }
+
         private void MarcarAlterado()
         {
             _alterado = true;
@@ -756,6 +854,7 @@ namespace MapaMaquinas
 
         protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
         {
+            _pingQueue?.Parar();
             if (_alterado)
             {
                 var resp = MessageBox.Show("Há alterações não salvas. Salvar antes de fechar?",

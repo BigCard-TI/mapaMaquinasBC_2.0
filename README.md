@@ -77,8 +77,7 @@ MapaMaquinas/
 
 ## Configuração
 
-Na primeira execução, use **Arquivo → Configurar caminho...** e informe a pasta onde está o arquivo `
-`. Pode ser um caminho local ou de rede. O caminho é salvo em `config.ini` ao lado do executável.
+Na primeira execução, use **Arquivo → Configurar caminho...** e informe a pasta onde está o arquivo `mapa_maquinas.json`. Pode ser um caminho local ou de rede. O caminho é salvo em `config.ini` ao lado do executável.
 
 ---
 
