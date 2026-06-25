@@ -671,7 +671,7 @@ namespace MapaMaquinas
 
             stack.Children.Add(new TextBlock
             {
-                Text = "Caminho da pasta com o arquivo maquinas.json\n(pode ser caminho de rede, ex: \\\\servidor\\Interno\\TI\\)",
+                Text = "Caminho da pasta com o arquivo mapa_maquinas.json\n(pode ser caminho de rede, ex: \\\\servidor\\Interno\\TI\\)",
                 Margin = new Thickness(0, 0, 0, 8), TextWrapping = TextWrapping.Wrap
             });
 
@@ -693,13 +693,13 @@ namespace MapaMaquinas
                 _config.SetCaminhoDados(caminho);
 
                 // Tenta carregar automaticamente após confirmar
-                var arquivo = _config.Arquivo("maquinas.json");
+                var arquivo = _config.Arquivo("mapa_maquinas.json");
                 win.Close();
 
                 if (File.Exists(arquivo))
                     CarregarArquivo(arquivo);
                 else
-                    AtualizarStatus($"Caminho salvo. Arquivo maquinas.json não encontrado em: {caminho}");
+                    AtualizarStatus($"Caminho salvo. Arquivo mapa_maquinas.json não encontrado em: {caminho}");
             };
             btnCancel.Click += (_, _) => win.Close();
 
