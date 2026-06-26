@@ -147,23 +147,41 @@ namespace MapaMaquinas.Controls
 
             menu.Items.Add(new Separator());
 
-            var itemRdp = new MenuItem { Header = "Conectar via RDP" };
-            itemRdp.Click += (_, _) =>
+            var itemAnyDesk = new MenuItem { Header = "Conectar via AnyDesk" };
+            itemAnyDesk.Click += (_, _) =>
             {
                 var alvo = _maquina?.Hostname ?? _maquina?.Ip ?? "";
-                if (!string.IsNullOrEmpty(alvo))
-                    System.Diagnostics.Process.Start("mstsc", $"/v:{alvo}");
+                if (string.IsNullOrEmpty(alvo)) return;
+                try
+                {
+                    System.Diagnostics.Process.Start("anydesk", alvo);
+                }
+                catch
+                {
+                    // AnyDesk não encontrado no PATH — tenta caminho padrão
+                    var caminhos = new[]
+                    {
+                        @"C:\Program Files (x86)\AnyDesk\AnyDesk.exe",
+                        @"C:\Program Files\AnyDesk\AnyDesk.exe"
+                    };
+                    bool iniciou = false;
+                    foreach (var caminho in caminhos)
+                    {
+                        if (System.IO.File.Exists(caminho))
+                        {
+                            System.Diagnostics.Process.Start(caminho, alvo);
+                            iniciou = true;
+                            break;
+                        }
+                    }
+                    if (!iniciou)
+                        System.Windows.MessageBox.Show(
+                            "AnyDesk não encontrado. Verifique se está instalado ou adicione ao PATH do sistema.",
+                            "AnyDesk", System.Windows.MessageBoxButton.OK,
+                            System.Windows.MessageBoxImage.Warning);
+                }
             };
-            menu.Items.Add(itemRdp);
-
-            var itemPasta = new MenuItem { Header = "Abrir pasta compartilhada" };
-            itemPasta.Click += (_, _) =>
-            {
-                var alvo = _maquina?.Hostname ?? _maquina?.Ip ?? "";
-                if (!string.IsNullOrEmpty(alvo))
-                    System.Diagnostics.Process.Start("explorer", $@"\{alvo}");
-            };
-            menu.Items.Add(itemPasta);
+            menu.Items.Add(itemAnyDesk);
 
             ContextMenu = menu;
         }
