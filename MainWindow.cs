@@ -51,8 +51,8 @@ namespace MapaMaquinas
         private Button _btnUndo = null!;
 
         // ── Filtro sem IP ─────────────────────────────────────────────────────
-        // Empresas com filtro 'sem IP' ativo (persiste ao trocar de aba)
-        private readonly HashSet<string> _filtroSemIpEmpresas = new();
+        // Estado global do filtro 'sem IP' — independente de qual empresa está aberta
+        private bool _filtroSemIp = false;
         private Button _btnFiltroSemIp = null!;
 
         // ── Zoom ──────────────────────────────────────────────────────────────
@@ -1025,43 +1025,37 @@ namespace MapaMaquinas
         // ── Filtro sem IP ──────────────────────────────────────────────────────
         private void ToggleFiltroSemIp()
         {
-            if (_empresaAtual == null) return;
-            var id = _empresaAtual.Id;
-
-            if (_filtroSemIpEmpresas.Contains(id))
-                _filtroSemIpEmpresas.Remove(id);
-            else
-                _filtroSemIpEmpresas.Add(id);
-
+            _filtroSemIp = !_filtroSemIp;
             AtualizarBotaoFiltro();
             AplicarFiltroSemIp();
         }
 
         private void AtualizarBotaoFiltro()
         {
-            var ativo = _empresaAtual != null &&
-                        _filtroSemIpEmpresas.Contains(_empresaAtual.Id);
-            _btnFiltroSemIp.Background = ativo
-                ? new SolidColorBrush(Color.FromRgb(255, 200, 60))
-                : null;
+            if (_filtroSemIp)
+                _btnFiltroSemIp.Background = new SolidColorBrush(Color.FromRgb(255, 200, 60));
+            else
+                _btnFiltroSemIp.ClearValue(Control.BackgroundProperty);
+
+            _btnFiltroSemIp.ToolTip = _filtroSemIp
+                ? "Filtro ativo — clique para desativar"
+                : "Destacar máquinas sem IP cadastrado";
         }
 
         private void AplicarFiltroSemIp()
         {
-            var ativo = _empresaAtual != null &&
-                        _filtroSemIpEmpresas.Contains(_empresaAtual.Id);
             int semIp = 0;
             foreach (var card in _cards)
             {
                 if (string.IsNullOrWhiteSpace(card.Maquina?.Ip))
                 {
                     semIp++;
-                    card.SetHighlight(ativo);
+                    card.SetHighlight(_filtroSemIp);
                 }
             }
 
-            if (ativo)
-                AtualizarStatus($"{_empresaAtual!.Nome}  |  Filtro ativo: {semIp} máquina(s) sem IP cadastrado");
+            if (_filtroSemIp)
+                AtualizarStatus($"{_empresaAtual?.Nome}  |  Filtro ativo: {semIp} máquina(s) sem IP cadastrado");
             else if (_empresaAtual != null)
                 AtualizarStatus($"{_empresaAtual.Nome}  |  {_empresaAtual.Maquinas.Count} máquina(s)  |  {_empresaAtual.Portas.Count} porta(s)");
         }
