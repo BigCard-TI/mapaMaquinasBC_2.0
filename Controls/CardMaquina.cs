@@ -61,6 +61,10 @@ namespace MapaMaquinas.Controls
         // Callback para "Verificar agora" — wired pelo MainWindow
         public Action? OnPingarAgora { get; set; }
 
+        // Status de ping expostos para o MainWindow atualizar a legenda
+        public StatusPing PingStatusHostname => _ping.StatusHostname;
+        public StatusPing PingStatusIp       => _ping.StatusIp;
+
         // ── Eventos ───────────────────────────────────────────────────────────
         public event EventHandler? Editar;
         public event EventHandler? Remover;
@@ -121,6 +125,45 @@ namespace MapaMaquinas.Controls
             var itemPing = new MenuItem { Header = "Verificar agora" };
             itemPing.Click += (_, _) => OnPingarAgora?.Invoke();
             menu.Items.Add(itemPing);
+
+            menu.Items.Add(new Separator());
+
+            // ── Ações rápidas ─────────────────────────────────────────────────
+            var itemCopiarHostname = new MenuItem { Header = "Copiar hostname" };
+            itemCopiarHostname.Click += (_, _) =>
+            {
+                if (!string.IsNullOrEmpty(_maquina?.Hostname))
+                    Clipboard.SetText(_maquina.Hostname);
+            };
+            menu.Items.Add(itemCopiarHostname);
+
+            var itemCopiarIp = new MenuItem { Header = "Copiar IP" };
+            itemCopiarIp.Click += (_, _) =>
+            {
+                if (!string.IsNullOrEmpty(_maquina?.Ip))
+                    Clipboard.SetText(_maquina.Ip);
+            };
+            menu.Items.Add(itemCopiarIp);
+
+            menu.Items.Add(new Separator());
+
+            var itemRdp = new MenuItem { Header = "Conectar via RDP" };
+            itemRdp.Click += (_, _) =>
+            {
+                var alvo = _maquina?.Hostname ?? _maquina?.Ip ?? "";
+                if (!string.IsNullOrEmpty(alvo))
+                    System.Diagnostics.Process.Start("mstsc", $"/v:{alvo}");
+            };
+            menu.Items.Add(itemRdp);
+
+            var itemPasta = new MenuItem { Header = "Abrir pasta compartilhada" };
+            itemPasta.Click += (_, _) =>
+            {
+                var alvo = _maquina?.Hostname ?? _maquina?.Ip ?? "";
+                if (!string.IsNullOrEmpty(alvo))
+                    System.Diagnostics.Process.Start("explorer", $@"\{alvo}");
+            };
+            menu.Items.Add(itemPasta);
 
             ContextMenu = menu;
         }

@@ -55,6 +55,12 @@ namespace MapaMaquinas
         private bool _filtroSemIp = false;
         private Button _btnFiltroSemIp = null!;
 
+        // ── Contadores da legenda ─────────────────────────────────────────────
+        private TextBlock _lblContOnline  = null!;
+        private TextBlock _lblContOffline = null!;
+        private TextBlock _lblContAlerta  = null!;
+        private TextBlock _lblContAguard  = null!;
+
         // ── Zoom ──────────────────────────────────────────────────────────────
         private double         _escala         = 1.0;
         private const double   EscalaMin       = 0.25;
@@ -201,37 +207,33 @@ namespace MapaMaquinas
                 Margin     = new Thickness(0, 0, 0, 6)
             });
 
-            // Explicação da barra dividida
-            stack.Children.Add(new TextBlock
-            {
-                Text         = "A barra é dividida em duas metades:",
-                FontSize     = 8,
-                Foreground   = new SolidColorBrush(Color.FromRgb(90, 90, 100)),
-                TextWrapping = TextWrapping.Wrap,
-                Margin       = new Thickness(0, 0, 0, 6)
-            });
+            // ── Contadores por status ─────────────────────────────────────────
+            _lblContOnline  = new TextBlock();
+            _lblContOffline = new TextBlock();
+            _lblContAlerta  = new TextBlock();
+            _lblContAguard  = new TextBlock();
 
-            AdicionarItemLegenda(stack, Color.FromRgb(50,  205, 50),  "Verde",
-                "Ping respondeu");
-            AdicionarItemLegenda(stack, Color.FromRgb(210, 50,  50),  "Vermelho",
-                "Sem resposta");
-            AdicionarItemLegenda(stack, Color.FromRgb(255, 190, 0),   "Amarelo",
-                "Aguardando verificação");
-            AdicionarItemLegenda(stack, Color.FromRgb(110, 110, 110), "Cinza",
-                "Sem dado cadastrado");
+            AdicionarItemLegendaComContador(stack,
+                Color.FromRgb(50,  205, 50), "Online",    "Ambos respondem",     _lblContOnline);
+            AdicionarItemLegendaComContador(stack,
+                Color.FromRgb(210, 50,  50), "Offline",   "Nenhum responde",     _lblContOffline);
+            AdicionarItemLegendaComContador(stack,
+                Color.FromRgb(255, 190, 0),  "Parcial",   "Hostname ou IP falha", _lblContAlerta);
+            AdicionarItemLegendaComContador(stack,
+                Color.FromRgb(110, 110, 110),"Aguardando","Ainda não verificado", _lblContAguard);
 
             // Separador
             stack.Children.Add(new Border
             {
-                BorderBrush = new SolidColorBrush(Color.FromRgb(210, 210, 215)),
+                BorderBrush     = new SolidColorBrush(Color.FromRgb(210, 210, 215)),
                 BorderThickness = new Thickness(0, 1, 0, 0),
-                Margin = new Thickness(0, 4, 0, 6)
+                Margin          = new Thickness(0, 6, 0, 6)
             });
 
-            // Exemplo visual da barra dividida
+            // Referência visual da barra
             stack.Children.Add(new TextBlock
             {
-                Text         = "Exemplo:",
+                Text         = "Barra dividida:",
                 FontSize     = 8,
                 FontWeight   = FontWeights.SemiBold,
                 Foreground   = new SolidColorBrush(Color.FromRgb(90, 90, 100)),
@@ -239,31 +241,87 @@ namespace MapaMaquinas
             });
 
             AdicionarItemLegendaDupla(stack,
-                Color.FromRgb(50,  205, 50),
-                Color.FromRgb(50,  205, 50),
-                "Tudo OK",
-                "Hostname e IP respondem");
-
+                Color.FromRgb(50,  205, 50), Color.FromRgb(50,  205, 50),
+                "Tudo OK", "Hostname e IP respondem");
             AdicionarItemLegendaDupla(stack,
-                Color.FromRgb(50,  205, 50),
-                Color.FromRgb(210, 50,  50),
-                "IP errado",
-                "Hostname OK, IP sem resposta");
-
+                Color.FromRgb(50,  205, 50), Color.FromRgb(210, 50,  50),
+                "IP errado", "Hostname OK, IP falha");
             AdicionarItemLegendaDupla(stack,
-                Color.FromRgb(210, 50,  50),
-                Color.FromRgb(50,  205, 50),
-                "Nome errado",
-                "IP OK, hostname sem resposta");
-
+                Color.FromRgb(210, 50,  50), Color.FromRgb(50,  205, 50),
+                "Nome errado", "IP OK, hostname falha");
             AdicionarItemLegendaDupla(stack,
-                Color.FromRgb(210, 50,  50),
-                Color.FromRgb(210, 50,  50),
-                "Offline",
-                "Nenhum respondeu");
+                Color.FromRgb(210, 50,  50), Color.FromRgb(210, 50,  50),
+                "Offline", "Nenhum respondeu");
 
             border.Child = stack;
             return border;
+        }
+
+        private static void AdicionarItemLegendaComContador(StackPanel parent, Color cor,
+            string titulo, string descricao, TextBlock lblContador)
+        {
+            var row = new Grid { Margin = new Thickness(0, 0, 0, 5) };
+            row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(5) });
+            row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+            row.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+
+            // Barra colorida
+            var barra = new Border
+            {
+                Width             = 5,
+                Height            = 28,
+                Background        = new SolidColorBrush(cor),
+                CornerRadius      = new CornerRadius(1),
+                VerticalAlignment = VerticalAlignment.Center
+            };
+            Grid.SetColumn(barra, 0);
+            row.Children.Add(barra);
+
+            // Textos
+            var textos = new StackPanel
+            {
+                Orientation       = Orientation.Vertical,
+                VerticalAlignment = VerticalAlignment.Center,
+                Margin            = new Thickness(8, 0, 4, 0)
+            };
+            textos.Children.Add(new TextBlock
+            {
+                Text       = titulo,
+                FontSize   = 10,
+                FontWeight = FontWeights.SemiBold,
+                Foreground = Brushes.Black
+            });
+            textos.Children.Add(new TextBlock
+            {
+                Text         = descricao,
+                FontSize     = 9,
+                Foreground   = new SolidColorBrush(Color.FromRgb(90, 90, 100)),
+                TextWrapping = TextWrapping.Wrap
+            });
+            Grid.SetColumn(textos, 1);
+            row.Children.Add(textos);
+
+            // Contador — badge redondo
+            lblContador.Text       = "—";
+            lblContador.FontSize   = 9;
+            lblContador.FontWeight = FontWeights.Bold;
+            lblContador.Foreground = Brushes.White;
+            lblContador.TextAlignment = TextAlignment.Center;
+            lblContador.MinWidth   = 22;
+            lblContador.VerticalAlignment = VerticalAlignment.Center;
+
+            var badge = new Border
+            {
+                Background        = new SolidColorBrush(Color.FromArgb(180, cor.R, cor.G, cor.B)),
+                CornerRadius      = new CornerRadius(10),
+                Padding           = new Thickness(4, 1, 4, 1),
+                VerticalAlignment = VerticalAlignment.Center,
+                Child             = lblContador
+            };
+            Grid.SetColumn(badge, 2);
+            row.Children.Add(badge);
+
+            parent.Children.Add(row);
         }
 
         private static void AdicionarItemLegenda(StackPanel parent, Color cor,
@@ -664,6 +722,7 @@ namespace MapaMaquinas
             AtualizarStatus($"{empresa.Nome}  |  {empresa.Maquinas.Count} máquina(s)  |  {empresa.Portas.Count} porta(s)");
             AtualizarBotaoFiltro();
             AplicarFiltroSemIp();
+            AtualizarContadoresLegenda();
         }
 
         private void LimparCards()
@@ -993,11 +1052,13 @@ namespace MapaMaquinas
             else
                 AtualizarStatus(_lblStatus.Text.Split('|')[0].TrimEnd() +
                     $"  |  Ping: verificando {atual}/{total}...");
+
+            AtualizarContadoresLegenda();
         }
 
         private void OnPingCicloCompleto()
         {
-            // Nada especial — o progresso já foi resetado para "aguardando"
+            AtualizarContadoresLegenda();
         }
 
         // ── Desfazer ──────────────────────────────────────────────────────────
@@ -1058,6 +1119,40 @@ namespace MapaMaquinas
                 AtualizarStatus($"{_empresaAtual?.Nome}  |  Filtro ativo: {semIp} máquina(s) sem IP cadastrado");
             else if (_empresaAtual != null)
                 AtualizarStatus($"{_empresaAtual.Nome}  |  {_empresaAtual.Maquinas.Count} máquina(s)  |  {_empresaAtual.Portas.Count} porta(s)");
+        }
+
+        private void AtualizarContadoresLegenda()
+        {
+            if (_lblContOnline == null) return;
+
+            int online = 0, offline = 0, parcial = 0, aguard = 0;
+
+            foreach (var card in _cards)
+            {
+                var sHost = card.PingStatusHostname;
+                var sIp   = card.PingStatusIp;
+
+                // Aguardando: qualquer dos dois ainda não verificado
+                if (sHost == StatusPing.Aguardando || sIp == StatusPing.Aguardando)
+                    { aguard++; continue; }
+
+                // Online: ambos respondem
+                if (sHost == StatusPing.Online && sIp == StatusPing.Online)
+                    { online++; continue; }
+
+                // Offline: nenhum responde
+                if (sHost != StatusPing.Online && sIp != StatusPing.Online)
+                    { offline++; continue; }
+
+                // Parcial: um responde, outro não
+                parcial++;
+            }
+
+            _lblContOnline.Text  = online.ToString();
+            _lblContOffline.Text = offline.ToString();
+            _lblContAlerta.Text  = parcial.ToString();
+            _lblContAguard.Text  = aguard == _cards.Count && _cards.Count > 0
+                                    ? "todos" : aguard.ToString();
         }
 
         private void MarcarAlterado()
