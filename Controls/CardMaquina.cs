@@ -145,43 +145,7 @@ namespace MapaMaquinas.Controls
             };
             menu.Items.Add(itemCopiarIp);
 
-            menu.Items.Add(new Separator());
 
-            var itemAnyDesk = new MenuItem { Header = "Conectar via AnyDesk" };
-            itemAnyDesk.Click += (_, _) =>
-            {
-                var alvo = _maquina?.Hostname ?? _maquina?.Ip ?? "";
-                if (string.IsNullOrEmpty(alvo)) return;
-                try
-                {
-                    System.Diagnostics.Process.Start("anydesk", alvo);
-                }
-                catch
-                {
-                    // AnyDesk não encontrado no PATH — tenta caminho padrão
-                    var caminhos = new[]
-                    {
-                        @"C:\Program Files (x86)\AnyDesk\AnyDesk.exe",
-                        @"C:\Program Files\AnyDesk\AnyDesk.exe"
-                    };
-                    bool iniciou = false;
-                    foreach (var caminho in caminhos)
-                    {
-                        if (System.IO.File.Exists(caminho))
-                        {
-                            System.Diagnostics.Process.Start(caminho, alvo);
-                            iniciou = true;
-                            break;
-                        }
-                    }
-                    if (!iniciou)
-                        System.Windows.MessageBox.Show(
-                            "AnyDesk não encontrado. Verifique se está instalado ou adicione ao PATH do sistema.",
-                            "AnyDesk", System.Windows.MessageBoxButton.OK,
-                            System.Windows.MessageBoxImage.Warning);
-                }
-            };
-            menu.Items.Add(itemAnyDesk);
 
             ContextMenu = menu;
         }
