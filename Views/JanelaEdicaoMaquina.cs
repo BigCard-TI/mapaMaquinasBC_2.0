@@ -146,6 +146,20 @@ namespace MapaMaquinas.Views
         }
 
 
+        private bool HostnameDuplicado(string hostname)
+        {
+            foreach (var m in _empresa.Maquinas)
+            {
+                // ignora a própria máquina ao editar
+                if (_maquina != null && string.Equals(m.Id, _maquina.Id,
+                        StringComparison.OrdinalIgnoreCase)) continue;
+                if (string.Equals(m.Hostname.Trim(), hostname.Trim(),
+                        StringComparison.OrdinalIgnoreCase))
+                    return true;
+            }
+            return false;
+        }
+
         private string IpDuplicado(string ip)
         {
             if (string.IsNullOrWhiteSpace(ip)) return "";
@@ -166,6 +180,14 @@ namespace MapaMaquinas.Views
             if (string.IsNullOrWhiteSpace(_edHostname.Text))
             {
                 MessageBox.Show("Hostname é obrigatório!", "Validação", MessageBoxButton.OK, MessageBoxImage.Warning);
+                _edHostname.Focus();
+                return;
+            }
+
+            if (HostnameDuplicado(_edHostname.Text))
+            {
+                MessageBox.Show($"Já existe uma máquina com o hostname \"{_edHostname.Text.Trim()}\".",
+                    "Hostname duplicado", MessageBoxButton.OK, MessageBoxImage.Warning);
                 _edHostname.Focus();
                 return;
             }

@@ -4,17 +4,16 @@ using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using Microsoft.Win32;
 using MapaMaquinas.Controls;
-using MapaMaquinas.Services;
-using System.Linq;
 using MapaMaquinas.Models;
 using MapaMaquinas.Services;
-using System.Linq;
 using MapaMaquinas.Views;
+using WinForms = System.Windows.Forms;
 
 namespace MapaMaquinas
 {
@@ -48,6 +47,14 @@ namespace MapaMaquinas
 
         // ── Desfazer ──────────────────────────────────────────────────────────
         private readonly UndoManager _undo = new();
+
+        // ── Histórico de busca ────────────────────────────────────────────────
+        private readonly List<string> _historicoBusca = new();
+        private const int MaxHistorico = 10;
+
+        // ── Bandeja ───────────────────────────────────────────────────────────
+        private WinForms.NotifyIcon?  _notifyIcon;
+        private bool         _fecharParaBandeja = true;
         private Button _btnUndo = null!;
 
         // ── Filtro sem IP ─────────────────────────────────────────────────────
@@ -82,6 +89,7 @@ namespace MapaMaquinas
             WindowStartupLocation = WindowStartupLocation.CenterScreen;
 
             Content = CriarLayout();
+            InicializarBandeja();
             _pingQueue = new PingQueue(Dispatcher);
             _pingQueue.ProgressoAtualizado += OnPingProgresso;
             _pingQueue.CicloCompleto       += OnPingCicloCompleto;
@@ -500,7 +508,13 @@ namespace MapaMaquinas
             panel.Items.Add(lblBusca);
 
             _edBusca = new TextBox { Width = 180, Margin = new Thickness(2), VerticalContentAlignment = VerticalAlignment.Center };
-            _edBusca.KeyDown += (_, e) => { if (e.Key == Key.Enter) BuscarMaquina(); };
+            _edBusca.KeyDown += (_, e) =>
+            {
+                if (e.Key == Key.Enter) BuscarMaquina();
+                if (e.Key == Key.Down)  MostrarHistoricoBusca();
+            };
+            // Popup de histórico ao focar
+            _edBusca.GotFocus += (_, _) => { if (_historicoBusca.Count > 0) MostrarHistoricoBusca(); };
             panel.Items.Add(_edBusca);
 
             var btnBuscar = new Button { Content = "🔍", Margin = new Thickness(2), ToolTip = "Buscar máquina" };
@@ -510,6 +524,14 @@ namespace MapaMaquinas
             var btnLimpar = new Button { Content = "✕", Margin = new Thickness(2), ToolTip = "Limpar busca" };
             btnLimpar.Click += (_, _) => LimparBusca();
             panel.Items.Add(btnLimpar);
+
+            panel.Items.Add(new Separator());
+
+            // ── Lista de máquinas ─────────────────────────────────────────────
+            var btnLista = new Button { Content = "☰ Lista", Margin = new Thickness(2),
+                ToolTip = "Ver todas as máquinas em tabela" };
+            btnLista.Click += (_, _) => AbrirListaMaquinas();
+            panel.Items.Add(btnLista);
 
             panel.Items.Add(new Separator());
 
@@ -554,6 +576,26 @@ namespace MapaMaquinas
             var btnZoomIn = new Button { Content = "+", Width = 24, Margin = new Thickness(2), ToolTip = "Aumentar zoom (Ctrl++)" };
             btnZoomIn.Click += (_, _) => AjustarZoom(+EscalaStep);
             panel.Items.Add(btnZoomIn);
+
+            panel.Items.Add(new Separator());
+
+            // ── Tamanho dos cards ─────────────────────────────────────────────
+            panel.Items.Add(new TextBlock
+            {
+                Text = "Cards:", VerticalAlignment = VerticalAlignment.Center,
+                Margin = new Thickness(4, 0, 4, 0), FontSize = 11
+            });
+
+            var sliderCard = new Slider
+            {
+                Minimum = 0.6, Maximum = 2.0, Value = 1.0,
+                Width = 80, TickFrequency = 0.1, IsSnapToTickEnabled = true,
+                VerticalAlignment = VerticalAlignment.Center,
+                ToolTip = "Tamanho dos cards (clique duplo para resetar)"
+            };
+            sliderCard.ValueChanged += (_, e) => AjustarTamanhoCards(e.NewValue);
+            sliderCard.MouseDoubleClick += (_, _) => { sliderCard.Value = 1.0; };
+            panel.Items.Add(sliderCard);
 
             return panel;
         }
@@ -870,6 +912,12 @@ namespace MapaMaquinas
             var termo = _edBusca.Text.Trim();
             if (string.IsNullOrEmpty(termo)) return;
 
+            // Adiciona ao histórico (sem duplicatas, mais recente no topo)
+            _historicoBusca.Remove(termo);
+            _historicoBusca.Insert(0, termo);
+            if (_historicoBusca.Count > MaxHistorico)
+                _historicoBusca.RemoveAt(_historicoBusca.Count - 1);
+
             foreach (var card in _cards)
             {
                 if (card.Maquina == null) continue;
@@ -890,6 +938,27 @@ namespace MapaMaquinas
             }
 
             AtualizarStatus($"Busca \"{termo}\": {_highlight.Count} resultado(s)");
+        }
+
+        private void MostrarHistoricoBusca()
+        {
+            if (_historicoBusca.Count == 0) return;
+
+            var menu = new ContextMenu();
+            foreach (var item in _historicoBusca)
+            {
+                var mi = new MenuItem { Header = item };
+                mi.Click += (_, _) => { _edBusca.Text = item; BuscarMaquina(); };
+                menu.Items.Add(mi);
+            }
+            menu.Items.Add(new Separator());
+            var limpar = new MenuItem { Header = "Limpar histórico" };
+            limpar.Click += (_, _) => _historicoBusca.Clear();
+            menu.Items.Add(limpar);
+
+            menu.PlacementTarget = _edBusca;
+            menu.Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom;
+            menu.IsOpen = true;
         }
 
         private void LimparBusca()
@@ -1155,6 +1224,78 @@ namespace MapaMaquinas
                                     ? "todos" : aguard.ToString();
         }
 
+        // ── Lista de máquinas ────────────────────────────────────────────────
+        private void AbrirListaMaquinas()
+        {
+            if (_empresaAtual == null || _cards.Count == 0)
+            { MessageBox.Show("Nenhuma máquina carregada."); return; }
+
+            new Views.JanelaListaMaquinas(this, _cards, card =>
+            {
+                // Navega até o card no mapa
+                var x = Canvas.GetLeft(card);
+                var y = Canvas.GetTop(card);
+                _mapaScroll.ScrollToHorizontalOffset(x - _mapaScroll.ActualWidth  / 2);
+                _mapaScroll.ScrollToVerticalOffset  (y - _mapaScroll.ActualHeight / 2);
+                card.SetHighlight(true);
+                _highlight.Add(card);
+            }).ShowDialog();
+        }
+
+        // ── Tamanho dos cards ─────────────────────────────────────────────────
+        private void AjustarTamanhoCards(double escala)
+        {
+            Controls.CardMaquina.Escala = escala;
+            foreach (var card in _cards)
+            {
+                // Força recálculo de Width/Height e re-render
+                card.Maquina = card.Maquina;
+            }
+        }
+
+        // ── Duplicidade de hostname ───────────────────────────────────────────
+        public bool HostnameDuplicado(string hostname, string? idAtual = null)
+        {
+            if (_empresaAtual == null) return false;
+            return _empresaAtual.Maquinas.Any(m =>
+                string.Equals(m.Hostname, hostname, StringComparison.OrdinalIgnoreCase) &&
+                !string.Equals(m.Id, idAtual, StringComparison.OrdinalIgnoreCase));
+        }
+
+        // ── Bandeja do sistema ────────────────────────────────────────────────
+        private void InicializarBandeja()
+        {
+            _notifyIcon = new WinForms.NotifyIcon
+            {
+                Icon    = System.Drawing.SystemIcons.Application,
+                Text    = "MapaMaquinas",
+                Visible = false
+            };
+
+            var menuBandeja = new WinForms.ContextMenuStrip();
+
+            var itemAbrir = new WinForms.ToolStripMenuItem("Abrir");
+            itemAbrir.Click += (_, _) => RestaurarJanela();
+            menuBandeja.Items.Add(itemAbrir);
+
+            menuBandeja.Items.Add(new WinForms.ToolStripSeparator());
+
+            var itemFechar = new WinForms.ToolStripMenuItem("Fechar o programa");
+            itemFechar.Click += (_, _) => { _fecharParaBandeja = false; Close(); };
+            menuBandeja.Items.Add(itemFechar);
+
+            _notifyIcon.ContextMenuStrip = menuBandeja;
+            _notifyIcon.DoubleClick += (_, _) => RestaurarJanela();
+        }
+
+        private void RestaurarJanela()
+        {
+            Show();
+            WindowState = WindowState.Normal;
+            Activate();
+            _notifyIcon!.Visible = false;
+        }
+
         private void MarcarAlterado()
         {
             _alterado = true;
@@ -1165,12 +1306,25 @@ namespace MapaMaquinas
 
         protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
         {
+            // Minimiza para bandeja em vez de fechar (exceto quando "Fechar programa" é clicado)
+            if (_fecharParaBandeja && _notifyIcon != null)
+            {
+                e.Cancel = true;
+                Hide();
+                _notifyIcon.Visible = true;
+                _notifyIcon.ShowBalloonTip(2000, "MapaMaquinas",
+                    "O sistema continua rodando na bandeja.", WinForms.ToolTipIcon.Info);
+                return;
+            }
+
             _pingQueue?.Parar();
+            _notifyIcon?.Dispose();
+
             if (_alterado)
             {
                 var resp = MessageBox.Show("Há alterações não salvas. Salvar antes de fechar?",
                     "Alterações pendentes", MessageBoxButton.YesNoCancel, MessageBoxImage.Question);
-                if (resp == MessageBoxResult.Cancel) { e.Cancel = true; return; }
+                if (resp == MessageBoxResult.Cancel) { e.Cancel = true; _fecharParaBandeja = true; return; }
                 if (resp == MessageBoxResult.Yes)    Salvar();
             }
             base.OnClosing(e);

@@ -25,12 +25,16 @@ namespace MapaMaquinas.Controls
     public class CardMaquina : Canvas
     {
         // ── Dimensões ─────────────────────────────────────────────────────────
-        private const double BarraW      = 4;    // largura da barra lateral
-        private const double CardWidth   = 74;
-        private const double LinhaH      = 11;
-        private const double PadTop      = 4;
-        private const double PadBase     = 3;
-        private const double PadLeft     = BarraW + 4;  // texto começa após a barra
+        private const double BarraW = 4;
+
+        // Tamanho configurável globalmente pelo MainWindow
+        public static double Escala { get; set; } = 1.0;
+        private static double CardWidth => 74  * Escala;
+        private static double LinhaH    => 11  * Escala;
+        private static double PadTop    => 4   * Escala;
+        private static double PadBase   => 3   * Escala;
+        private static double PadLeft   => BarraW + 4 * Escala;
+        private static double FonteBase => 6.5 * Escala;
 
         // ── Cores de status ───────────────────────────────────────────────────
         private static readonly Color CorOnline   = Color.FromRgb(50,  205, 50);
@@ -51,6 +55,7 @@ namespace MapaMaquinas.Controls
         private Setor?   _setor;
         private bool     _dragging;
         private Point    _dragOrigin;
+        private bool     _moveuDeVerdade;   // true só quando o mouse se deslocou de fato
         private bool     _highlight;
         private bool     _blinkState;
         private DispatcherTimer? _blinkTimer;
@@ -173,6 +178,8 @@ namespace MapaMaquinas.Controls
             Width  = CardWidth;
             int linhas = string.IsNullOrEmpty(_maquina.Ramal) ? 2 : 3;
             Height = PadTop + linhas * LinhaH + PadBase;
+            // Atualiza tamanho da fonte de acordo com a escala
+
             AtualizarTooltip();
             InvalidateVisual();
         }
@@ -316,14 +323,14 @@ namespace MapaMaquinas.Controls
             dc.DrawGeometry(brush, null, geo);
 
             // "!" branco pequeno dentro do triângulo
-            var ft = MakeText("!", 5.5, bold: true);
+            var ft = MakeText("!", 5.5 * Escala, bold: true);
             dc.DrawText(ft, new Point(Width - ft.Width - 1.5, Height - ft.Height - 0.5));
         }
 
         private void DesenharTexto(DrawingContext dc, string texto, bool bold, double y)
         {
             double areaW = CardWidth - PadLeft - 3;
-            var ft = MakeText(texto, 6.5, bold);
+            var ft = MakeText(texto, FonteBase, bold);
             double tx = PadLeft + Math.Max(0, areaW / 2 - ft.Width / 2);
             dc.DrawText(ft, new Point(tx, y + (LinhaH - ft.Height) / 2));
         }
@@ -354,10 +361,9 @@ namespace MapaMaquinas.Controls
         {
             base.OnMouseLeftButtonDown(e);
             if (e.ClickCount == 2) { Visualizar?.Invoke(this, EventArgs.Empty); return; }
-            // Notifica ANTES de mover — UndoManager registra a posição atual
-            PreMover?.Invoke(this, EventArgs.Empty);
-            _dragging   = true;
-            _dragOrigin = e.GetPosition(this);
+            _dragging        = true;
+            _moveuDeVerdade  = false;
+            _dragOrigin      = e.GetPosition(this);
             CaptureMouse();
             Panel.SetZIndex(this, 1000);
         }
@@ -366,9 +372,17 @@ namespace MapaMaquinas.Controls
         {
             base.OnMouseMove(e);
             if (!_dragging) return;
+
             var pos  = e.GetPosition(Parent as IInputElement);
             var newX = pos.X - _dragOrigin.X;
             var newY = pos.Y - _dragOrigin.Y;
+
+            // Só registra no UndoManager na primeira vez que o mouse de fato se move
+            if (!_moveuDeVerdade)
+            {
+                _moveuDeVerdade = true;
+                PreMover?.Invoke(this, EventArgs.Empty);
+            }
             if (Parent is FrameworkElement parent)
             {
                 newX = Math.Max(0, Math.Min(newX, parent.ActualWidth  - Width));
