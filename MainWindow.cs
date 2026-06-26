@@ -52,6 +52,9 @@ namespace MapaMaquinas
         private readonly List<string> _historicoBusca = new();
         private const int MaxHistorico = 10;
 
+        // ── Slider de tamanho dos cards ───────────────────────────────────────
+        private Slider _sliderCard = null!;
+
         // ── Bandeja ───────────────────────────────────────────────────────────
         private WinForms.NotifyIcon?  _notifyIcon;
         private bool         _fecharParaBandeja = true;
@@ -586,16 +589,16 @@ namespace MapaMaquinas
                 Margin = new Thickness(4, 0, 4, 0), FontSize = 11
             });
 
-            var sliderCard = new Slider
+            _sliderCard = new Slider
             {
                 Minimum = 0.6, Maximum = 2.0, Value = 1.0,
                 Width = 80, TickFrequency = 0.1, IsSnapToTickEnabled = true,
                 VerticalAlignment = VerticalAlignment.Center,
                 ToolTip = "Tamanho dos cards (clique duplo para resetar)"
             };
-            sliderCard.ValueChanged += (_, e) => AjustarTamanhoCards(e.NewValue);
-            sliderCard.MouseDoubleClick += (_, _) => { sliderCard.Value = 1.0; };
-            panel.Items.Add(sliderCard);
+            _sliderCard.ValueChanged += (_, e) => AjustarTamanhoCards(e.NewValue);
+            _sliderCard.MouseDoubleClick += (_, _) => { _sliderCard.Value = 1.0; };
+            panel.Items.Add(_sliderCard);
 
             return panel;
         }
@@ -649,6 +652,10 @@ namespace MapaMaquinas
             {
                 _jsonManager.CarregarDoArquivo(caminho);
                 PopularAbas();
+                // Restaura escala salva no JSON
+                var escala = _repositorio.EscalaCards;
+                Controls.CardMaquina.Escala = escala;
+                if (_sliderCard != null) _sliderCard.Value = escala;
                 _alterado = false;
                 _menuSalvar.IsEnabled = true;
                 _menuExportarPng.IsEnabled = true;
@@ -1246,11 +1253,9 @@ namespace MapaMaquinas
         private void AjustarTamanhoCards(double escala)
         {
             Controls.CardMaquina.Escala = escala;
+            _repositorio.EscalaCards    = escala;   // persiste no JSON ao próximo Salvar()
             foreach (var card in _cards)
-            {
-                // Força recálculo de Width/Height e re-render
-                card.Maquina = card.Maquina;
-            }
+                card.Maquina = card.Maquina;        // força re-render
         }
 
         // ── Duplicidade de hostname ───────────────────────────────────────────

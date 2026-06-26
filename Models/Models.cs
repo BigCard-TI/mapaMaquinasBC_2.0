@@ -82,6 +82,7 @@ namespace MapaMaquinas.Models
         public string        Versao             { get; set; } = "1.0";
         public string        UltimaAtualizacao  { get; set; } = "";
         public string        AtualizadoPor      { get; set; } = "";
+        public double        EscalaCards        { get; set; } = 1.0;
 
         public Empresa? BuscarEmpresa(string id) =>
             Empresas.Find(e => string.Equals(e.Id, id, StringComparison.OrdinalIgnoreCase));

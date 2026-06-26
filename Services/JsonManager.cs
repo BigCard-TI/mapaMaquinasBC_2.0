@@ -34,6 +34,7 @@ namespace MapaMaquinas.Services
             _repositorio.Versao            = root["versao"]?.GetValue<string>() ?? "1.0";
             _repositorio.UltimaAtualizacao = root["ultima_atualizacao"]?.GetValue<string>() ?? "";
             _repositorio.AtualizadoPor     = root["atualizado_por"]?.GetValue<string>() ?? "";
+            _repositorio.EscalaCards       = root["escala_cards"]  ?.GetValue<double>() ?? 1.0;
 
             if (root["empresas"] is JsonArray arr)
                 CarregarEmpresas(arr);
@@ -134,6 +135,7 @@ namespace MapaMaquinas.Services
                 ["versao"]             = _repositorio.Versao,
                 ["ultima_atualizacao"] = _repositorio.UltimaAtualizacao,
                 ["atualizado_por"]     = _repositorio.AtualizadoPor,
+                ["escala_cards"]       = _repositorio.EscalaCards,
                 ["empresas"]           = SerializarEmpresas()
             };
 
