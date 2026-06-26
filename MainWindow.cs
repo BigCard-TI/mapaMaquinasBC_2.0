@@ -51,7 +51,8 @@ namespace MapaMaquinas
         private Button _btnUndo = null!;
 
         // ── Filtro sem IP ─────────────────────────────────────────────────────
-        private bool   _filtroSemIp = false;
+        // Empresas com filtro 'sem IP' ativo (persiste ao trocar de aba)
+        private readonly HashSet<string> _filtroSemIpEmpresas = new();
         private Button _btnFiltroSemIp = null!;
 
         // ── Zoom ──────────────────────────────────────────────────────────────
@@ -661,6 +662,8 @@ namespace MapaMaquinas
             }
 
             AtualizarStatus($"{empresa.Nome}  |  {empresa.Maquinas.Count} máquina(s)  |  {empresa.Portas.Count} porta(s)");
+            AtualizarBotaoFiltro();
+            AplicarFiltroSemIp();
         }
 
         private void LimparCards()
@@ -715,7 +718,7 @@ namespace MapaMaquinas
             card.AtualizarSetor(setor!);
             card.Maquina = card.Maquina; // força re-render
             MarcarAlterado();
-            if (_filtroSemIp) AplicarFiltroSemIp();
+            AplicarFiltroSemIp();
         }
 
         private void RemoverMaquina(CardMaquina card)
@@ -1022,28 +1025,43 @@ namespace MapaMaquinas
         // ── Filtro sem IP ──────────────────────────────────────────────────────
         private void ToggleFiltroSemIp()
         {
-            _filtroSemIp = !_filtroSemIp;
-            _btnFiltroSemIp.Background = _filtroSemIp
+            if (_empresaAtual == null) return;
+            var id = _empresaAtual.Id;
+
+            if (_filtroSemIpEmpresas.Contains(id))
+                _filtroSemIpEmpresas.Remove(id);
+            else
+                _filtroSemIpEmpresas.Add(id);
+
+            AtualizarBotaoFiltro();
+            AplicarFiltroSemIp();
+        }
+
+        private void AtualizarBotaoFiltro()
+        {
+            var ativo = _empresaAtual != null &&
+                        _filtroSemIpEmpresas.Contains(_empresaAtual.Id);
+            _btnFiltroSemIp.Background = ativo
                 ? new SolidColorBrush(Color.FromRgb(255, 200, 60))
                 : null;
-            AplicarFiltroSemIp();
         }
 
         private void AplicarFiltroSemIp()
         {
+            var ativo = _empresaAtual != null &&
+                        _filtroSemIpEmpresas.Contains(_empresaAtual.Id);
             int semIp = 0;
             foreach (var card in _cards)
             {
                 if (string.IsNullOrWhiteSpace(card.Maquina?.Ip))
                 {
                     semIp++;
-                    // Destaca com highlight de busca se o filtro está ativo
-                    card.SetHighlight(_filtroSemIp);
+                    card.SetHighlight(ativo);
                 }
             }
 
-            if (_filtroSemIp)
-                AtualizarStatus($"Filtro ativo: {semIp} máquina(s) sem IP cadastrado");
+            if (ativo)
+                AtualizarStatus($"{_empresaAtual!.Nome}  |  Filtro ativo: {semIp} máquina(s) sem IP cadastrado");
             else if (_empresaAtual != null)
                 AtualizarStatus($"{_empresaAtual.Nome}  |  {_empresaAtual.Maquinas.Count} máquina(s)  |  {_empresaAtual.Portas.Count} porta(s)");
         }
