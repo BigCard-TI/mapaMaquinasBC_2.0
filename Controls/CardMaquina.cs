@@ -66,6 +66,13 @@ namespace MapaMaquinas.Controls
         // Callback para "Verificar agora" — wired pelo MainWindow
         public Action? OnPingarAgora { get; set; }
 
+        // Callback chamado quando o ping é atualizado — usado pelo canvas para espelhar
+        // o resultado do cardPing correspondente (quando este card é o cardPing)
+        public Action<ResultadoPing>? OnResultadoAtualizado { get; set; }
+
+        // Último resultado registrado — usado pelo canvas ao carregar a aba
+        public ResultadoPing UltimoResultado => _ping;
+
         // Status de ping expostos para o MainWindow atualizar a legenda
         public StatusPing PingStatusHostname => _ping.StatusHostname;
         public StatusPing PingStatusIp       => _ping.StatusIp;
@@ -162,6 +169,9 @@ namespace MapaMaquinas.Controls
             _ping = resultado;
             AtualizarTooltip();
             InvalidateVisual();
+
+            // Notifica o card do canvas que este cardPing foi atualizado
+            OnResultadoAtualizado?.Invoke(resultado);
         }
 
         public void ResetarPing()
