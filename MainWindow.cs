@@ -34,9 +34,7 @@ namespace MapaMaquinas
         private ScrollViewer      _mapaScroll      = null!;
         private Image             _imgFundo        = null!;
         private TextBox           _edBusca         = null!;
-        private TextBlock         _lblStatus       = null!;   // lado esquerdo: empresa
-        private TextBlock         _lblPingStatus   = null!;   // lado direito: ping
-        private string            _pingStatusTexto = "";      // texto de ping persistente
+        private TextBlock         _lblStatus       = null!;
         private MenuItem          _menuSalvar      = null!;
         private MenuItem          _menuExportarPng = null!;
 
@@ -47,9 +45,8 @@ namespace MapaMaquinas
         // ── Fila de ping ──────────────────────────────────────────────────────
         private PingQueue? _pingQueue;
 
-        // Cards de ping — PERMANENTES, um por máquina de todas as empresas.
-        // Não são destruídos ao trocar de aba. Os contadores usam estes.
-        // Chave = Maquina.Id
+        // Cards de ping permanentes — um por máquina de todas as empresas.
+        // Sobrevivem a trocas de aba. Chave = Maquina.Id
         private readonly Dictionary<string, CardMaquina> _cardsPing = new();
 
         // ── Desfazer ──────────────────────────────────────────────────────────
@@ -188,37 +185,15 @@ namespace MapaMaquinas
             Grid.SetRow(splitter, 2);
             grid.Children.Add(splitter);
 
-            // ── Status bar — dois campos independentes ────────────────────────
+            // ── Status bar ────────────────────────────────────────────────────
             var statusBar = new Border
             {
-                Background      = new SolidColorBrush(Color.FromRgb(240, 240, 240)),
-                BorderBrush     = Brushes.LightGray,
-                BorderThickness = new Thickness(0, 1, 0, 0),
-                Padding         = new Thickness(8, 3, 8, 3)
+                Background = new SolidColorBrush(Color.FromRgb(240, 240, 240)),
+                BorderBrush = Brushes.LightGray, BorderThickness = new Thickness(0, 1, 0, 0),
+                Padding = new Thickness(8, 3, 8, 3)
             };
-
-            var dock = new DockPanel();
-
-            // Direita: status do ping — não é sobrescrito pela troca de empresa
-            _lblPingStatus = new TextBlock
-            {
-                FontSize          = 11,
-                Foreground        = new SolidColorBrush(Color.FromRgb(80, 80, 90)),
-                VerticalAlignment = VerticalAlignment.Center,
-                Margin            = new Thickness(12, 0, 0, 0)
-            };
-            DockPanel.SetDock(_lblPingStatus, Dock.Right);
-            dock.Children.Add(_lblPingStatus);
-
-            // Esquerda: nome da empresa + contagem
-            _lblStatus = new TextBlock
-            {
-                FontSize          = 11,
-                VerticalAlignment = VerticalAlignment.Center
-            };
-            dock.Children.Add(_lblStatus);
-
-            statusBar.Child = dock;
+            _lblStatus = new TextBlock { FontSize = 11 };
+            statusBar.Child = _lblStatus;
             Grid.SetRow(statusBar, 3);
             grid.Children.Add(statusBar);
 
@@ -545,6 +520,13 @@ namespace MapaMaquinas
                 if (e.Key == Key.Enter) BuscarMaquina();
                 if (e.Key == Key.Down)  MostrarHistoricoBusca();
             };
+            _edBusca.TextChanged += (_, _) =>
+            {
+                if (string.IsNullOrWhiteSpace(_edBusca.Text))
+                    LimparBuscaSemClear();   // campo vazio → remove highlights imediatamente
+                else
+                    BuscarMaquina();          // tem texto → busca em tempo real
+            };
             // Popup de histórico ao focar
             _edBusca.GotFocus += (_, _) => { if (_historicoBusca.Count > 0) MostrarHistoricoBusca(); };
             panel.Items.Add(_edBusca);
@@ -698,7 +680,6 @@ namespace MapaMaquinas
 
         private void PopularAbas()
         {
-            // Para ciclo anterior (novo JSON aberto)
             _pingQueue?.Parar();
             _cardsPing.Clear();
 
@@ -712,9 +693,7 @@ namespace MapaMaquinas
 
             if (_tabEmpresas.Items.Count == 0) return;
 
-            // ── Cria os cards de ping para TODAS as empresas de uma vez ────────
-            // Estes objetos são permanentes — sobrevivem a qualquer troca de aba.
-            // Os contadores da legenda sempre lerão destes, não dos cards do canvas.
+            // Cria cards de ping para TODAS as empresas de uma vez
             var todosCardsPing = new List<CardMaquina>();
             foreach (TabItem tab in _tabEmpresas.Items)
             {
@@ -732,7 +711,6 @@ namespace MapaMaquinas
             // Inicia o ciclo global UMA única vez
             _pingQueue!.IniciarGlobal(todosCardsPing);
 
-            // Carrega o canvas da primeira empresa
             _tabEmpresas.SelectedIndex = 0;
             _empresaAtual = (Empresa)((TabItem)_tabEmpresas.Items[0]).Tag;
             CarregarMapa(_empresaAtual);
@@ -787,24 +765,16 @@ namespace MapaMaquinas
                 card.PreMover   += (s, _) => { _undo.Registrar((CardMaquina)s!); AtualizarBtnUndo(); };
                 card.MouseLeftButtonUp += (_, _) => MarcarAlterado();
 
-                // ── Espelha o resultado de ping do cardPing correspondente ────
-                // O ciclo de ping atualiza os _cardsPing (invisíveis).
-                // O card do canvas exibe o mesmo resultado ao ser criado e
-                // recebe atualizações em tempo real via callback no cardPing.
+                // Espelha o resultado de ping do cardPing correspondente
                 if (_cardsPing.TryGetValue(m.Id, out var cardPing))
                 {
-                    // Aplica o resultado atual (se já foi pingado antes de trocar de aba)
                     card.AtualizarResultadoPing(cardPing.UltimoResultado);
-
-                    // Registra callback: quando o cardPing for atualizado pelo PingQueue,
-                    // repassa para o card do canvas automaticamente
                     cardPing.OnResultadoAtualizado = resultado =>
                         Dispatcher.Invoke(() => card.AtualizarResultadoPing(resultado));
                 }
 
                 Canvas.SetLeft(card, m.PosX);
                 Canvas.SetTop(card, m.PosY);
-
                 _mapaCanvas.Children.Add(card);
                 _cards.Add(card);
             }
@@ -831,12 +801,11 @@ namespace MapaMaquinas
 
         private void LimparCards()
         {
-            // NÃO para nem modifica o PingQueue.
-            // Limpa apenas o canvas e os callbacks de espelhamento.
+            // NÃO para nem modifica o PingQueue — ciclo independente do canvas.
+            // Remove apenas os callbacks de espelhamento para não acumular.
             _undo.Limpar();
             AtualizarBtnUndo();
 
-            // Remove o callback de espelhamento dos cardsPing para não acumular
             foreach (var c in _cards)
             {
                 if (c.Maquina != null && _cardsPing.TryGetValue(c.Maquina.Id, out var cp))
@@ -874,13 +843,6 @@ namespace MapaMaquinas
             Canvas.SetTop(card, m.PosY);
             _mapaCanvas.Children.Add(card);
             _cards.Add(card);
-
-            // Cria e registra o card de ping correspondente
-            var cardPing = new CardMaquina(m, setor);
-            cardPing.OnPingarAgora = () => _pingQueue!.PingarAgora(cardPing);
-            _cardsPing[m.Id]       = cardPing;
-            _pingQueue?.AdicionarCard(cardPing);
-
             MarcarAlterado();
         }
 
@@ -903,13 +865,7 @@ namespace MapaMaquinas
             if (MessageBox.Show($"Remover a máquina \"{card.Maquina.Hostname}\"?", "Confirmar",
                 MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes) return;
 
-            // Remove o card de PING correspondente (não o card do canvas)
-            if (_cardsPing.TryGetValue(card.Maquina.Id, out var cardPing))
-            {
-                _pingQueue?.RemoverCard(cardPing);
-                _cardsPing.Remove(card.Maquina.Id);
-            }
-
+            _pingQueue?.RemoverCard(card);
             _empresaAtual?.Maquinas.Remove(card.Maquina);
             _mapaCanvas.Children.Remove(card);
             _cards.Remove(card);
@@ -1196,19 +1152,18 @@ namespace MapaMaquinas
         // ── Callbacks do PingQueue ────────────────────────────────────────────
         private void OnPingProgresso(int atual, int total)
         {
-            // Atualiza APENAS o label de ping — não toca no label da empresa
-            _pingStatusTexto = atual == 0
-                ? "⏳ Aguardando próximo ciclo (2 min)..."
-                : $"🔄 Verificando {atual}/{total}...";
-            _lblPingStatus.Text = _pingStatusTexto;
+            if (atual == 0)
+                AtualizarStatus(_lblStatus.Text.Split('|')[0].TrimEnd() +
+                    $"  |  Ping: aguardando próximo ciclo (2 min)");
+            else
+                AtualizarStatus(_lblStatus.Text.Split('|')[0].TrimEnd() +
+                    $"  |  Ping: verificando {atual}/{total}...");
 
             AtualizarContadoresLegenda();
         }
 
         private void OnPingCicloCompleto()
         {
-            _pingStatusTexto    = "✔ Último ciclo concluído";
-            _lblPingStatus.Text = _pingStatusTexto;
             AtualizarContadoresLegenda();
         }
 
@@ -1278,30 +1233,32 @@ namespace MapaMaquinas
 
             int online = 0, offline = 0, parcial = 0, aguard = 0;
 
-            // Itera sobre os cards de PING (todas as empresas, permanentes)
-            // — não sobre os cards do canvas (que mudam a cada troca de aba)
-            foreach (var card in _cardsPing.Values)
+            foreach (var card in _cards)
             {
                 var sHost = card.PingStatusHostname;
                 var sIp   = card.PingStatusIp;
 
+                // Aguardando: qualquer dos dois ainda não verificado
                 if (sHost == StatusPing.Aguardando || sIp == StatusPing.Aguardando)
                     { aguard++; continue; }
 
+                // Online: ambos respondem
                 if (sHost == StatusPing.Online && sIp == StatusPing.Online)
                     { online++; continue; }
 
+                // Offline: nenhum responde
                 if (sHost != StatusPing.Online && sIp != StatusPing.Online)
                     { offline++; continue; }
 
+                // Parcial: um responde, outro não
                 parcial++;
             }
 
-            var total = _cardsPing.Count;
             _lblContOnline.Text  = online.ToString();
             _lblContOffline.Text = offline.ToString();
             _lblContAlerta.Text  = parcial.ToString();
-            _lblContAguard.Text  = aguard == total && total > 0 ? "todos" : aguard.ToString();
+            _lblContAguard.Text  = aguard == _cards.Count && _cards.Count > 0
+                                    ? "todos" : aguard.ToString();
         }
 
         // ── Lista de máquinas ────────────────────────────────────────────────
