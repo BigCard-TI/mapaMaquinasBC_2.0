@@ -1,12 +1,37 @@
 {
   "Version": 1,
   "WorkspaceRootPath": "C:\\Users\\rafael.souza\\Desktop\\BC - Rafael\\Projects\\Projects\\mapaMaquinasBC_2.0\\",
-  "Documents": [],
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{0461D450-AAE0-9228-5530-DE411B6F510F}|MapaMaquinas.csproj|c:\\users\\rafael.souza\\desktop\\bc - rafael\\projects\\projects\\mapamaquinasbc_2.0\\app.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0461D450-AAE0-9228-5530-DE411B6F510F}|MapaMaquinas.csproj|solutionrelative:app.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
   "DocumentGroupContainers": [
     {
       "Orientation": 0,
       "VerticalTabListWidth": 256,
-      "DocumentGroups": []
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 0,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "App.cs",
+              "DocumentMoniker": "C:\\Users\\rafael.souza\\Desktop\\BC - Rafael\\Projects\\Projects\\mapaMaquinasBC_2.0\\App.cs",
+              "RelativeDocumentMoniker": "App.cs",
+              "ToolTip": "C:\\Users\\rafael.souza\\Desktop\\BC - Rafael\\Projects\\Projects\\mapaMaquinasBC_2.0\\App.cs",
+              "RelativeToolTip": "App.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-06-29T18:08:44.501Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
     }
   ]
 }

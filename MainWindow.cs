@@ -585,7 +585,7 @@ namespace MapaMaquinas
             // ── Tamanho dos cards ─────────────────────────────────────────────
             panel.Items.Add(new TextBlock
             {
-                Text = "Cards:", VerticalAlignment = VerticalAlignment.Center,
+                Text = "Tamanho:", VerticalAlignment = VerticalAlignment.Center,
                 Margin = new Thickness(4, 0, 4, 0), FontSize = 11
             });
 
