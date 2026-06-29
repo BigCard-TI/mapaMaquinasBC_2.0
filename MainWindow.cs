@@ -669,6 +669,9 @@ namespace MapaMaquinas
 
         private void PopularAbas()
         {
+            // Para o ciclo anterior se existir (novo arquivo aberto)
+            _pingQueue?.Parar();
+
             // Desconecta o evento para não disparar durante a montagem
             _tabEmpresas.SelectionChanged -= OnEmpresaChanged;
             _tabEmpresas.Items.Clear();
@@ -688,6 +691,26 @@ namespace MapaMaquinas
                 var primeiraTab = (TabItem)_tabEmpresas.Items[0];
                 _empresaAtual = (Empresa)primeiraTab.Tag;
                 CarregarMapa(_empresaAtual);
+
+                // Pré-carrega os cards das demais empresas no ciclo global
+                // sem exibi-los no canvas (eles ficam apenas na fila de ping)
+                foreach (TabItem tab in _tabEmpresas.Items)
+                {
+                    if (tab == _tabEmpresas.Items[0]) continue;
+                    if (tab.Tag is Empresa empExtra)
+                    {
+                        foreach (var m in empExtra.Maquinas)
+                        {
+                            var setor = empExtra.BuscarSetor(m.SetorId);
+                            var card  = new CardMaquina(m, setor);
+                            card.OnPingarAgora = () => _pingQueue!.PingarAgora(card);
+                            _pingQueue!.AdicionarCard(card);
+                        }
+                    }
+                }
+
+                // Inicia o ciclo global UMA única vez com todos os cards
+                _pingQueue!.Iniciar(_pingQueue.TodosCards);
             }
         }
 
@@ -746,13 +769,14 @@ namespace MapaMaquinas
                 _mapaCanvas.Children.Add(card);
                 _cards.Add(card);
 
-                // Registra na fila de ping e conecta o "Verificar agora"
+                // Adiciona ao ciclo global de ping (sem reiniciar o timer)
                 _pingQueue!.AdicionarCard(card);
                 card.OnPingarAgora = () => _pingQueue.PingarAgora(card);
             }
 
-            // Inicia a fila: pinga uma máquina por vez, aguarda 2 min entre ciclos
-            _pingQueue!.Iniciar(_cards);
+            // Inicia o loop apenas se ainda não estiver rodando
+            // (na primeira carga) — nas trocas de aba apenas adiciona cards
+            _pingQueue!.AdicionarCards(_cards);
 
             // Cards de portas
             foreach (var p in empresa.Portas)
@@ -776,8 +800,11 @@ namespace MapaMaquinas
 
         private void LimparCards()
         {
-            // Para a fila centralizada e limpa o histórico de desfazer
-            _pingQueue?.Parar();
+            // NÃO para a fila de ping — ela é global e continua rodando.
+            // Apenas remove os cards desta empresa do ciclo.
+            if (_pingQueue != null)
+                _pingQueue.RemoverCards(_cards);
+
             _undo.Limpar();
             AtualizarBtnUndo();
 
@@ -1270,9 +1297,22 @@ namespace MapaMaquinas
         // ── Bandeja do sistema ────────────────────────────────────────────────
         private void InicializarBandeja()
         {
+            // Carrega o ícone do próprio executável (app.ico embutido como recurso)
+            System.Drawing.Icon icone;
+            try
+            {
+                var exePath = System.Reflection.Assembly.GetExecutingAssembly().Location;
+                icone = System.Drawing.Icon.ExtractAssociatedIcon(exePath)
+                        ?? System.Drawing.SystemIcons.Application;
+            }
+            catch
+            {
+                icone = System.Drawing.SystemIcons.Application;
+            }
+
             _notifyIcon = new WinForms.NotifyIcon
             {
-                Icon    = System.Drawing.SystemIcons.Application,
+                Icon    = icone,
                 Text    = "MapaMaquinas",
                 Visible = false
             };

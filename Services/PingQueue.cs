@@ -9,46 +9,79 @@ using MapaMaquinas.Controls;
 namespace MapaMaquinas.Services
 {
     /// <summary>
-    /// Fila de ping com concorrência controlada.
+    /// Fila de ping com concorrência controlada e ciclo GLOBAL.
     ///
     /// Fluxo por ciclo:
-    ///   - Todas as máquinas são pingadas em paralelo, limitadas a
-    ///     <see cref="MaxConcorrencia"/> simultâneas (padrão: 5).
+    ///   - Todas as máquinas de TODAS as empresas são pingadas em paralelo,
+    ///     limitadas a <see cref="MaxConcorrencia"/> simultâneas (padrão: 5).
     ///   - Ao terminar o ciclo completo, aguarda <see cref="PausaEntreCiclos"/> (2 min).
-    ///   - Recomeça.
+    ///   - Recomeça — sem reiniciar o timer ao trocar de aba.
     ///
     /// "Verificar agora" pinga um card fora de ciclo, sem interferir na fila.
+    ///
+    /// IMPORTANTE: a lista global é mantida aqui. Ao trocar de empresa, o
+    /// MainWindow chama AdicionarCard/RemoverCard — nunca Iniciar() novamente.
+    /// Iniciar() é chamado UMA única vez após o carregamento inicial.
     /// </summary>
     public class PingQueue : IDisposable
     {
         // ── Configuração ──────────────────────────────────────────────────────
-        /// <summary>Máximo de máquinas pingadas ao mesmo tempo.</summary>
-        public static int MaxConcorrencia { get; set; } = 5;
-
-        /// <summary>Pausa após o ciclo completo antes de reiniciar.</summary>
+        public static int      MaxConcorrencia  { get; set; } = 5;
         public static TimeSpan PausaEntreCiclos { get; set; } = TimeSpan.FromMinutes(2);
 
         // ── Estado ────────────────────────────────────────────────────────────
-        private readonly Dispatcher _dispatcher;
-        private List<CardMaquina>   _cards = new();
-        private CancellationTokenSource _cts = new();
+        private readonly Dispatcher         _dispatcher;
+        private readonly List<CardMaquina>  _cards = new();
+        private CancellationTokenSource     _cts   = new();
+        private bool                        _rodando = false;
 
-        public event Action<int, int>? ProgressoAtualizado;   // (concluídos, total)
+        public event Action<int, int>? ProgressoAtualizado;
         public event Action?           CicloCompleto;
 
         public PingQueue(Dispatcher dispatcher) => _dispatcher = dispatcher;
 
         // ── API pública ───────────────────────────────────────────────────────
 
-        public void Iniciar(List<CardMaquina> cards)
+        /// <summary>
+        /// Inicia o loop de ping com os cards fornecidos.
+        /// Deve ser chamado UMA única vez — ao carregar o arquivo JSON.
+        /// Para adicionar cards de outras empresas use AdicionarCard().
+        /// </summary>
+        public void Iniciar(IEnumerable<CardMaquina> cardsIniciais)
         {
-            Parar();
-            _cards = new List<CardMaquina>(cards);
-            _cts   = new CancellationTokenSource();
-            Task.Run(() => Loop(_cts.Token));
+            lock (_cards)
+            {
+                _cards.Clear();
+                _cards.AddRange(cardsIniciais);
+            }
+
+            if (!_rodando)
+            {
+                _cts     = new CancellationTokenSource();
+                _rodando = true;
+                Task.Run(() => Loop(_cts.Token));
+            }
         }
 
-        public void Parar() => _cts.Cancel();
+        /// <summary>
+        /// Adiciona cards de uma nova empresa ao ciclo em andamento.
+        /// NÃO reinicia o timer — o ciclo continua de onde estava.
+        /// </summary>
+        public void AdicionarCards(IEnumerable<CardMaquina> novosCards)
+        {
+            lock (_cards)
+            {
+                foreach (var c in novosCards)
+                    if (!_cards.Contains(c))
+                        _cards.Add(c);
+            }
+        }
+
+        public void Parar()
+        {
+            _cts.Cancel();
+            _rodando = false;
+        }
 
         public void PingarAgora(CardMaquina card)
         {
@@ -65,18 +98,34 @@ namespace MapaMaquinas.Services
             lock (_cards) { _cards.Remove(card); }
         }
 
+        /// <summary>Retorna snapshot thread-safe de todos os cards registrados.</summary>
+        public List<CardMaquina> TodosCards
+        {
+            get { lock (_cards) { return new List<CardMaquina>(_cards); } }
+        }
+
+        /// <summary>Remove todos os cards de uma empresa específica do ciclo.</summary>
+        public void RemoverCards(IEnumerable<CardMaquina> cardsRemover)
+        {
+            lock (_cards)
+            {
+                foreach (var c in cardsRemover)
+                    _cards.Remove(c);
+            }
+        }
+
         // ── Loop principal ────────────────────────────────────────────────────
         private async Task Loop(CancellationToken token)
         {
             while (!token.IsCancellationRequested)
             {
+                // Snapshot thread-safe de todos os cards (todas as empresas)
                 List<CardMaquina> snapshot;
                 lock (_cards) { snapshot = new List<CardMaquina>(_cards); }
 
-                int total     = snapshot.Count;
+                int total      = snapshot.Count;
                 int concluidos = 0;
 
-                // Semáforo para limitar concorrência
                 var sem = new SemaphoreSlim(MaxConcorrencia, MaxConcorrencia);
 
                 var tasks = snapshot.Select(async card =>
@@ -92,7 +141,7 @@ namespace MapaMaquinas.Services
                     finally { sem.Release(); }
                 }).ToList();
 
-                try { await Task.WhenAll(tasks); }
+                try   { await Task.WhenAll(tasks); }
                 catch (TaskCanceledException) { return; }
 
                 if (token.IsCancellationRequested) return;
@@ -103,16 +152,18 @@ namespace MapaMaquinas.Services
                     CicloCompleto?.Invoke();
                 });
 
-                // Pausa de 2 min antes do próximo ciclo
-                try { await Task.Delay(PausaEntreCiclos, token); }
+                // ── Aguarda 2 minutos antes do próximo ciclo ──────────────────
+                // Este delay NUNCA é interrompido pela troca de aba.
+                // Só é cancelado quando Parar() é chamado (fechar o app).
+                try   { await Task.Delay(PausaEntreCiclos, token); }
                 catch (TaskCanceledException) { return; }
             }
         }
 
         private async Task PingarCard(CardMaquina card, CancellationToken token)
         {
-            var hostname = card.Maquina?.Hostname ?? "";
-            var ip       = card.Maquina?.Ip       ?? "";
+            var hostname  = card.Maquina?.Hostname ?? "";
+            var ip        = card.Maquina?.Ip       ?? "";
             var resultado = await PingWorker.Executar(hostname, ip, token);
 
             if (!token.IsCancellationRequested)

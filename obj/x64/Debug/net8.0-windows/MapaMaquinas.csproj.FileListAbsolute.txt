@@ -1,15 +1,10 @@
+C:\Users\rafael.souza\Desktop\BC - Rafael\Projects\Projects\mapaMaquinasBC_2.0\bin\x64\Debug\net8.0-windows\MapaMaquinas.exe
+C:\Users\rafael.souza\Desktop\BC - Rafael\Projects\Projects\mapaMaquinasBC_2.0\bin\x64\Debug\net8.0-windows\MapaMaquinas.dll
 C:\Users\rafael.souza\Desktop\BC - Rafael\Projects\Projects\mapaMaquinasBC_2.0\obj\x64\Debug\net8.0-windows\MapaMaquinas.GeneratedMSBuildEditorConfig.editorconfig
 C:\Users\rafael.souza\Desktop\BC - Rafael\Projects\Projects\mapaMaquinasBC_2.0\obj\x64\Debug\net8.0-windows\MapaMaquinas.AssemblyInfoInputs.cache
 C:\Users\rafael.souza\Desktop\BC - Rafael\Projects\Projects\mapaMaquinasBC_2.0\obj\x64\Debug\net8.0-windows\MapaMaquinas.AssemblyInfo.cs
 C:\Users\rafael.souza\Desktop\BC - Rafael\Projects\Projects\mapaMaquinasBC_2.0\obj\x64\Debug\net8.0-windows\MapaMaquinas.csproj.CoreCompileInputs.cache
 C:\Users\rafael.souza\Desktop\BC - Rafael\Projects\Projects\mapaMaquinasBC_2.0\obj\x64\Debug\net8.0-windows\MapaMaquinas.sourcelink.json
-C:\Users\rafael.souza\Desktop\BC - Rafael\Projects\Projects\mapaMaquinasBC_2.0\bin\x64\Debug\net8.0-windows\MapaMaquinas.exe
-C:\Users\rafael.souza\Desktop\BC - Rafael\Projects\Projects\mapaMaquinasBC_2.0\bin\x64\Debug\net8.0-windows\MapaMaquinas.deps.json
-C:\Users\rafael.souza\Desktop\BC - Rafael\Projects\Projects\mapaMaquinasBC_2.0\bin\x64\Debug\net8.0-windows\MapaMaquinas.runtimeconfig.json
-C:\Users\rafael.souza\Desktop\BC - Rafael\Projects\Projects\mapaMaquinasBC_2.0\bin\x64\Debug\net8.0-windows\MapaMaquinas.dll
-C:\Users\rafael.souza\Desktop\BC - Rafael\Projects\Projects\mapaMaquinasBC_2.0\bin\x64\Debug\net8.0-windows\MapaMaquinas.pdb
 C:\Users\rafael.souza\Desktop\BC - Rafael\Projects\Projects\mapaMaquinasBC_2.0\obj\x64\Debug\net8.0-windows\MapaMaquinas.dll
 C:\Users\rafael.souza\Desktop\BC - Rafael\Projects\Projects\mapaMaquinasBC_2.0\obj\x64\Debug\net8.0-windows\refint\MapaMaquinas.dll
 C:\Users\rafael.souza\Desktop\BC - Rafael\Projects\Projects\mapaMaquinasBC_2.0\obj\x64\Debug\net8.0-windows\MapaMaquinas.pdb
-C:\Users\rafael.souza\Desktop\BC - Rafael\Projects\Projects\mapaMaquinasBC_2.0\obj\x64\Debug\net8.0-windows\MapaMaquinas.genruntimeconfig.cache
-C:\Users\rafael.souza\Desktop\BC - Rafael\Projects\Projects\mapaMaquinasBC_2.0\obj\x64\Debug\net8.0-windows\ref\MapaMaquinas.dll

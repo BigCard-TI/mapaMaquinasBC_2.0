@@ -67,7 +67,7 @@
               "RelativeDocumentMoniker": "..\\..\\..\\..\\..\\..\\..\\Program Files\\Microsoft Visual Studio\\18\\Community\\MSBuild\\Current\\Bin\\amd64\\Microsoft.Common.CurrentVersion.targets",
               "ToolTip": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\MSBuild\\Current\\Bin\\amd64\\Microsoft.Common.CurrentVersion.targets",
               "RelativeToolTip": "..\\..\\..\\..\\..\\..\\..\\Program Files\\Microsoft Visual Studio\\18\\Community\\MSBuild\\Current\\Bin\\amd64\\Microsoft.Common.CurrentVersion.targets",
-              "ViewState": "AgIAAP0UAAAAAAAAAAAtwBQVAAAEAAAAAAAAAA==",
+              "ViewState": "AgIAAP0UAAAAAAAAAAAtwAUVAAAzAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003801|",
               "WhenOpened": "2026-06-26T17:19:21.666Z",
               "EditorCaption": ""
@@ -82,8 +82,7 @@
               "RelativeToolTip": "Controls\\CardMaquina.cs",
               "ViewState": "AgIAAJ0AAAAAAAAAAAAIwKUAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-06-26T16:43:28.014Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-06-26T16:43:28.014Z"
             },
             {
               "$type": "Document",
@@ -191,8 +190,7 @@
               "RelativeToolTip": "MainWindow.cs",
               "ViewState": "AgIAAEwAAAAAAAAAAAAAAB0AAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-06-25T12:10:24.123Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-06-25T12:10:24.123Z"
             },
             {
               "$type": "Document",
