@@ -3,51 +3,8 @@
   "WorkspaceRootPath": "C:\\Users\\rafael.souza\\Desktop\\BC - Rafael\\Projects\\Projects\\mapaMaquinasBC_2.0\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\MSBuild\\Current\\Bin\\amd64\\Microsoft.Common.CurrentVersion.targets||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{0461D450-AAE0-9228-5530-DE411B6F510F}|MapaMaquinas.csproj|c:\\users\\rafael.souza\\desktop\\bc - rafael\\projects\\projects\\mapamaquinasbc_2.0\\mainwindow.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{0461D450-AAE0-9228-5530-DE411B6F510F}|MapaMaquinas.csproj|solutionrelative:mainwindow.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{0461D450-AAE0-9228-5530-DE411B6F510F}|MapaMaquinas.csproj|c:\\users\\rafael.souza\\desktop\\bc - rafael\\projects\\projects\\mapamaquinasbc_2.0\\controls\\cardmaquina.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{0461D450-AAE0-9228-5530-DE411B6F510F}|MapaMaquinas.csproj|solutionrelative:controls\\cardmaquina.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{0461D450-AAE0-9228-5530-DE411B6F510F}|MapaMaquinas.csproj|c:\\users\\rafael.souza\\desktop\\bc - rafael\\projects\\projects\\mapamaquinasbc_2.0\\views\\janelaedicaoporta.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{0461D450-AAE0-9228-5530-DE411B6F510F}|MapaMaquinas.csproj|solutionrelative:views\\janelaedicaoporta.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{0461D450-AAE0-9228-5530-DE411B6F510F}|MapaMaquinas.csproj|c:\\users\\rafael.souza\\desktop\\bc - rafael\\projects\\projects\\mapamaquinasbc_2.0\\views\\janelaedicaomaquina.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{0461D450-AAE0-9228-5530-DE411B6F510F}|MapaMaquinas.csproj|solutionrelative:views\\janelaedicaomaquina.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{0461D450-AAE0-9228-5530-DE411B6F510F}|MapaMaquinas.csproj|c:\\users\\rafael.souza\\desktop\\bc - rafael\\projects\\projects\\mapamaquinasbc_2.0\\views\\janelasetores.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{0461D450-AAE0-9228-5530-DE411B6F510F}|MapaMaquinas.csproj|solutionrelative:views\\janelasetores.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{0461D450-AAE0-9228-5530-DE411B6F510F}|MapaMaquinas.csproj|c:\\users\\rafael.souza\\desktop\\bc - rafael\\projects\\projects\\mapamaquinasbc_2.0\\models\\models.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{0461D450-AAE0-9228-5530-DE411B6F510F}|MapaMaquinas.csproj|solutionrelative:models\\models.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{0461D450-AAE0-9228-5530-DE411B6F510F}|MapaMaquinas.csproj|c:\\users\\rafael.souza\\desktop\\bc - rafael\\projects\\projects\\mapamaquinasbc_2.0\\services\\config.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{0461D450-AAE0-9228-5530-DE411B6F510F}|MapaMaquinas.csproj|solutionrelative:services\\config.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{0461D450-AAE0-9228-5530-DE411B6F510F}|MapaMaquinas.csproj|c:\\users\\rafael.souza\\desktop\\bc - rafael\\projects\\projects\\mapamaquinasbc_2.0\\views\\janelavisualizacao.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{0461D450-AAE0-9228-5530-DE411B6F510F}|MapaMaquinas.csproj|solutionrelative:views\\janelavisualizacao.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{0461D450-AAE0-9228-5530-DE411B6F510F}|MapaMaquinas.csproj|c:\\users\\rafael.souza\\desktop\\bc - rafael\\projects\\projects\\mapamaquinasbc_2.0\\readme.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}",
-      "RelativeMoniker": "D:0:0:{0461D450-AAE0-9228-5530-DE411B6F510F}|MapaMaquinas.csproj|solutionrelative:readme.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{0461D450-AAE0-9228-5530-DE411B6F510F}|MapaMaquinas.csproj|c:\\users\\rafael.souza\\desktop\\bc - rafael\\projects\\projects\\mapamaquinasbc_2.0\\services\\pingservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{0461D450-AAE0-9228-5530-DE411B6F510F}|MapaMaquinas.csproj|solutionrelative:services\\pingservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{0461D450-AAE0-9228-5530-DE411B6F510F}|MapaMaquinas.csproj|c:\\users\\rafael.souza\\desktop\\bc - rafael\\projects\\projects\\mapamaquinasbc_2.0\\services\\jsonmanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{0461D450-AAE0-9228-5530-DE411B6F510F}|MapaMaquinas.csproj|solutionrelative:services\\jsonmanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{0461D450-AAE0-9228-5530-DE411B6F510F}|MapaMaquinas.csproj|c:\\users\\rafael.souza\\desktop\\bc - rafael\\projects\\projects\\mapamaquinasbc_2.0\\app.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0461D450-AAE0-9228-5530-DE411B6F510F}|MapaMaquinas.csproj|solutionrelative:app.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -62,147 +19,15 @@
             {
               "$type": "Document",
               "DocumentIndex": 0,
-              "Title": "Microsoft.Common.CurrentVersion.targets",
-              "DocumentMoniker": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\MSBuild\\Current\\Bin\\amd64\\Microsoft.Common.CurrentVersion.targets",
-              "RelativeDocumentMoniker": "..\\..\\..\\..\\..\\..\\..\\Program Files\\Microsoft Visual Studio\\18\\Community\\MSBuild\\Current\\Bin\\amd64\\Microsoft.Common.CurrentVersion.targets",
-              "ToolTip": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\MSBuild\\Current\\Bin\\amd64\\Microsoft.Common.CurrentVersion.targets",
-              "RelativeToolTip": "..\\..\\..\\..\\..\\..\\..\\Program Files\\Microsoft Visual Studio\\18\\Community\\MSBuild\\Current\\Bin\\amd64\\Microsoft.Common.CurrentVersion.targets",
-              "ViewState": "AgIAAP0UAAAAAAAAAAAtwAUVAAAzAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003801|",
-              "WhenOpened": "2026-06-26T17:19:21.666Z",
+              "Title": "App.cs",
+              "DocumentMoniker": "C:\\Users\\rafael.souza\\Desktop\\BC - Rafael\\Projects\\Projects\\mapaMaquinasBC_2.0\\App.cs",
+              "RelativeDocumentMoniker": "App.cs",
+              "ToolTip": "C:\\Users\\rafael.souza\\Desktop\\BC - Rafael\\Projects\\Projects\\mapaMaquinasBC_2.0\\App.cs",
+              "RelativeToolTip": "App.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-06-29T18:08:44.501Z",
               "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "CardMaquina.cs",
-              "DocumentMoniker": "C:\\Users\\rafael.souza\\Desktop\\BC - Rafael\\Projects\\Projects\\mapaMaquinasBC_2.0\\Controls\\CardMaquina.cs",
-              "RelativeDocumentMoniker": "Controls\\CardMaquina.cs",
-              "ToolTip": "C:\\Users\\rafael.souza\\Desktop\\BC - Rafael\\Projects\\Projects\\mapaMaquinasBC_2.0\\Controls\\CardMaquina.cs",
-              "RelativeToolTip": "Controls\\CardMaquina.cs",
-              "ViewState": "AgIAAJ0AAAAAAAAAAAAIwKUAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-06-26T16:43:28.014Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 3,
-              "Title": "JanelaEdicaoPorta.cs",
-              "DocumentMoniker": "C:\\Users\\rafael.souza\\Desktop\\BC - Rafael\\Projects\\Projects\\mapaMaquinasBC_2.0\\Views\\JanelaEdicaoPorta.cs",
-              "RelativeDocumentMoniker": "Views\\JanelaEdicaoPorta.cs",
-              "ToolTip": "C:\\Users\\rafael.souza\\Desktop\\BC - Rafael\\Projects\\Projects\\mapaMaquinasBC_2.0\\Views\\JanelaEdicaoPorta.cs",
-              "RelativeToolTip": "Views\\JanelaEdicaoPorta.cs",
-              "ViewState": "AgIAAFcAAAAAAAAAAAA4wAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-06-25T13:59:03.363Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 6,
-              "Title": "Models.cs",
-              "DocumentMoniker": "C:\\Users\\rafael.souza\\Desktop\\BC - Rafael\\Projects\\Projects\\mapaMaquinasBC_2.0\\Models\\Models.cs",
-              "RelativeDocumentMoniker": "Models\\Models.cs",
-              "ToolTip": "C:\\Users\\rafael.souza\\Desktop\\BC - Rafael\\Projects\\Projects\\mapaMaquinasBC_2.0\\Models\\Models.cs",
-              "RelativeToolTip": "Models\\Models.cs",
-              "ViewState": "AgIAAEEAAAAAAAAAAAA2wAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-06-25T13:58:44.641Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 8,
-              "Title": "JanelaVisualizacao.cs",
-              "DocumentMoniker": "C:\\Users\\rafael.souza\\Desktop\\BC - Rafael\\Projects\\Projects\\mapaMaquinasBC_2.0\\Views\\JanelaVisualizacao.cs",
-              "RelativeDocumentMoniker": "Views\\JanelaVisualizacao.cs",
-              "ToolTip": "C:\\Users\\rafael.souza\\Desktop\\BC - Rafael\\Projects\\Projects\\mapaMaquinasBC_2.0\\Views\\JanelaVisualizacao.cs",
-              "RelativeToolTip": "Views\\JanelaVisualizacao.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-06-25T13:58:27.865Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 5,
-              "Title": "JanelaSetores.cs",
-              "DocumentMoniker": "C:\\Users\\rafael.souza\\Desktop\\BC - Rafael\\Projects\\Projects\\mapaMaquinasBC_2.0\\Views\\JanelaSetores.cs",
-              "RelativeDocumentMoniker": "Views\\JanelaSetores.cs",
-              "ToolTip": "C:\\Users\\rafael.souza\\Desktop\\BC - Rafael\\Projects\\Projects\\mapaMaquinasBC_2.0\\Views\\JanelaSetores.cs",
-              "RelativeToolTip": "Views\\JanelaSetores.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-06-25T13:58:25.983Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 4,
-              "Title": "JanelaEdicaoMaquina.cs",
-              "DocumentMoniker": "C:\\Users\\rafael.souza\\Desktop\\BC - Rafael\\Projects\\Projects\\mapaMaquinasBC_2.0\\Views\\JanelaEdicaoMaquina.cs",
-              "RelativeDocumentMoniker": "Views\\JanelaEdicaoMaquina.cs",
-              "ToolTip": "C:\\Users\\rafael.souza\\Desktop\\BC - Rafael\\Projects\\Projects\\mapaMaquinasBC_2.0\\Views\\JanelaEdicaoMaquina.cs",
-              "RelativeToolTip": "Views\\JanelaEdicaoMaquina.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-06-25T13:58:24.804Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 10,
-              "Title": "PingService.cs",
-              "DocumentMoniker": "C:\\Users\\rafael.souza\\Desktop\\BC - Rafael\\Projects\\Projects\\mapaMaquinasBC_2.0\\Services\\PingService.cs",
-              "RelativeDocumentMoniker": "Services\\PingService.cs",
-              "ToolTip": "C:\\Users\\rafael.souza\\Desktop\\BC - Rafael\\Projects\\Projects\\mapaMaquinasBC_2.0\\Services\\PingService.cs",
-              "RelativeToolTip": "Services\\PingService.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABYAAAA+AAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-06-25T12:37:20.773Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 9,
-              "Title": "README.md",
-              "DocumentMoniker": "C:\\Users\\rafael.souza\\Desktop\\BC - Rafael\\Projects\\Projects\\mapaMaquinasBC_2.0\\README.md",
-              "RelativeDocumentMoniker": "README.md",
-              "ToolTip": "C:\\Users\\rafael.souza\\Desktop\\BC - Rafael\\Projects\\Projects\\mapaMaquinasBC_2.0\\README.md",
-              "RelativeToolTip": "README.md",
-              "ViewState": "AgIAADoAAAAAAAAAAAAIwFEAAAADAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001818|",
-              "WhenOpened": "2026-06-25T12:17:44.809Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 7,
-              "Title": "Config.cs",
-              "DocumentMoniker": "C:\\Users\\rafael.souza\\Desktop\\BC - Rafael\\Projects\\Projects\\mapaMaquinasBC_2.0\\Services\\Config.cs",
-              "RelativeDocumentMoniker": "Services\\Config.cs",
-              "ToolTip": "C:\\Users\\rafael.souza\\Desktop\\BC - Rafael\\Projects\\Projects\\mapaMaquinasBC_2.0\\Services\\Config.cs",
-              "RelativeToolTip": "Services\\Config.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAQAAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-06-25T12:17:16.018Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "MainWindow.cs",
-              "DocumentMoniker": "C:\\Users\\rafael.souza\\Desktop\\BC - Rafael\\Projects\\Projects\\mapaMaquinasBC_2.0\\MainWindow.cs",
-              "RelativeDocumentMoniker": "MainWindow.cs",
-              "ToolTip": "C:\\Users\\rafael.souza\\Desktop\\BC - Rafael\\Projects\\Projects\\mapaMaquinasBC_2.0\\MainWindow.cs",
-              "RelativeToolTip": "MainWindow.cs",
-              "ViewState": "AgIAAEwAAAAAAAAAAAAAAB0AAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-06-25T12:10:24.123Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 11,
-              "Title": "JsonManager.cs",
-              "DocumentMoniker": "C:\\Users\\rafael.souza\\Desktop\\BC - Rafael\\Projects\\Projects\\mapaMaquinasBC_2.0\\Services\\JsonManager.cs",
-              "RelativeDocumentMoniker": "Services\\JsonManager.cs",
-              "ToolTip": "C:\\Users\\rafael.souza\\Desktop\\BC - Rafael\\Projects\\Projects\\mapaMaquinasBC_2.0\\Services\\JsonManager.cs",
-              "RelativeToolTip": "Services\\JsonManager.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAYAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-06-25T12:10:17.497Z"
             }
           ]
         }
