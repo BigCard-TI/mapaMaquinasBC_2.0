@@ -51,7 +51,7 @@ namespace MapaMaquinas.Services
                 await conn.OpenAsync();
 
                 using var cmd = new SqlCommand(
-                    "SELECT SENHA FROM USUARIOS WHERE CODIGO = @codigo", conn);
+                    "SELECT SENHA FROM USUARIOS WITH (NOLOCK) WHERE CODIGO = @codigo", conn);
                 cmd.Parameters.Add("@codigo", SqlDbType.NVarChar, 4).Value = codigoUsuario;
 
                 var resultado = await cmd.ExecuteScalarAsync();
@@ -81,7 +81,7 @@ namespace MapaMaquinas.Services
 
                 // Confirma que a tabela esperada existe
                 using var cmd = new SqlCommand(
-                    "SELECT COUNT(*) FROM USUARIOS", conn);
+                    "SELECT COUNT(*) FROM USUARIOS WITH (NOLOCK)", conn);
                 await cmd.ExecuteScalarAsync();
 
                 return (true, "Conexão estabelecida e tabela USUARIOS acessível.");

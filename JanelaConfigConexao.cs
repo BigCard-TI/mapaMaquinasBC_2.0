@@ -71,7 +71,12 @@ namespace MapaMaquinas.Views
 
             _edUsuarioSql = AddCampo(stack, "Usuário SQL");
             stack.Children.Add(new TextBlock { Text = "Senha SQL", Margin = new Thickness(0, 8, 0, 2) });
-            _edSenhaSql = new PasswordBox { Margin = new Thickness(0, 0, 0, 8), Height = 26 };
+            _edSenhaSql = new PasswordBox
+            {
+                Margin = new Thickness(0, 0, 0, 8), Height = 26,
+                HorizontalContentAlignment = HorizontalAlignment.Left,
+                Padding = new Thickness(6, 0, 0, 0)
+            };
             stack.Children.Add(_edSenhaSql);
 
             _lblResultado = new TextBlock
@@ -114,7 +119,13 @@ namespace MapaMaquinas.Views
         private static TextBox AddCampo(StackPanel parent, string label)
         {
             parent.Children.Add(new TextBlock { Text = label, Margin = new Thickness(0, 8, 0, 2) });
-            var tb = new TextBox { Height = 26, Margin = new Thickness(0, 0, 0, 4) };
+            var tb = new TextBox
+            {
+                Height = 26, Margin = new Thickness(0, 0, 0, 4),
+                HorizontalContentAlignment = HorizontalAlignment.Left,
+                TextAlignment = TextAlignment.Left,
+                Padding = new Thickness(6, 0, 0, 0)
+            };
             parent.Children.Add(tb);
             return tb;
         }

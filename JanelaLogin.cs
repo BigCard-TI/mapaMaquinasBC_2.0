@@ -29,7 +29,7 @@ namespace MapaMaquinas.Views
         {
             Title       = "MapaMaquinas — Login";
             Width       = 380;
-            Height      = 350;
+            Height      = 420;
             ResizeMode  = ResizeMode.NoResize;
             WindowStartupLocation = WindowStartupLocation.CenterScreen;
             WindowStyle = WindowStyle.SingleBorderWindow;
@@ -40,83 +40,90 @@ namespace MapaMaquinas.Views
 
         private UIElement CriarLayout()
         {
-            var grid = new Grid { Margin = new Thickness(24) };
-            grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto }); // título
-            grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto }); // usuário
-            grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto }); // senha
-            grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto }); // erro
-            grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto }); // progresso
-            grid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
-            grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto }); // botões
-            grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto }); // config
+            // StackPanel em vez de Grid com Star row — cada elemento ocupa
+            // exatamente a altura que precisa, sem sobras nem espremimento.
+            var stack = new StackPanel { Margin = new Thickness(28, 24, 28, 24) };
 
             var titulo = new TextBlock
             {
-                Text = "Mapa Máquinas",
+                Text = "Mapa de Máquinas",
                 FontSize = 18, FontWeight = FontWeights.Bold,
                 HorizontalAlignment = HorizontalAlignment.Center,
-                Margin = new Thickness(0, 0, 0, 4)
+                Margin = new Thickness(0, 0, 0, 2)
             };
-            Grid.SetRow(titulo, 0);
-            grid.Children.Add(titulo);
+            stack.Children.Add(titulo);
+
+            var subtitulo = new TextBlock
+            {
+                Text = "BigCard / BigCash",
+                FontSize = 11, Foreground = new SolidColorBrush(Color.FromRgb(120, 120, 130)),
+                HorizontalAlignment = HorizontalAlignment.Center,
+                Margin = new Thickness(0, 0, 0, 24)
+            };
+            stack.Children.Add(subtitulo);
 
             // ── Usuário ──────────────────────────────────────────────────────
-            var pUsuario = new StackPanel { Margin = new Thickness(0, 0, 0, 12) };
-            pUsuario.Children.Add(new TextBlock { Text = "Usuário (4 dígitos)", FontSize = 11, Margin = new Thickness(0, 0, 0, 4) });
+            stack.Children.Add(new TextBlock
+            {
+                Text = "Usuário (4 dígitos)", FontSize = 11,
+                Margin = new Thickness(0, 0, 0, 4)
+            });
             _edUsuario = new TextBox
             {
                 FontSize = 16, Height = 32, MaxLength = 4,
                 VerticalContentAlignment = VerticalAlignment.Center,
-                TextAlignment = TextAlignment.Center
+                HorizontalContentAlignment = HorizontalAlignment.Left,
+                TextAlignment = TextAlignment.Left,
+                Padding = new Thickness(8, 0, 0, 0),
+                Margin = new Thickness(0, 0, 0, 16)
             };
             _edUsuario.PreviewTextInput += (_, e) => e.Handled = !ApenasDigitos(e.Text);
             _edUsuario.KeyDown += (_, e) => { if (e.Key == Key.Enter) _edSenha.Focus(); };
-            pUsuario.Children.Add(_edUsuario);
-            Grid.SetRow(pUsuario, 1);
-            grid.Children.Add(pUsuario);
+            stack.Children.Add(_edUsuario);
 
             // ── Senha ────────────────────────────────────────────────────────
-            var pSenha = new StackPanel { Margin = new Thickness(0, 0, 0, 8) };
-            pSenha.Children.Add(new TextBlock { Text = "Senha", FontSize = 11, Margin = new Thickness(0, 0, 0, 4) });
+            stack.Children.Add(new TextBlock
+            {
+                Text = "Senha", FontSize = 11,
+                Margin = new Thickness(0, 0, 0, 4)
+            });
             _edSenha = new PasswordBox
             {
                 FontSize = 16, Height = 32, MaxLength = 6,
-                VerticalContentAlignment = VerticalAlignment.Center
+                VerticalContentAlignment = VerticalAlignment.Center,
+                HorizontalContentAlignment = HorizontalAlignment.Left,
+                Padding = new Thickness(8, 0, 0, 0),
+                Margin = new Thickness(0, 0, 0, 4)
             };
             _edSenha.PreviewTextInput += (_, e) => e.Handled = !ApenasDigitos(e.Text);
             _edSenha.KeyDown += async (_, e) => { if (e.Key == Key.Enter) await TentarLogin(); };
-            pSenha.Children.Add(_edSenha);
-            Grid.SetRow(pSenha, 2);
-            grid.Children.Add(pSenha);
+            stack.Children.Add(_edSenha);
 
             // ── Mensagem de erro ────────────────────────────────────────────
             _lblErro = new TextBlock
             {
                 Foreground = new SolidColorBrush(Color.FromRgb(190, 40, 40)),
                 FontSize = 11, TextWrapping = TextWrapping.Wrap,
-                Margin = new Thickness(0, 4, 0, 0), Visibility = Visibility.Collapsed
+                Margin = new Thickness(0, 6, 0, 0), Visibility = Visibility.Collapsed
             };
-            Grid.SetRow(_lblErro, 3);
-            grid.Children.Add(_lblErro);
+            stack.Children.Add(_lblErro);
 
             // ── Progresso ────────────────────────────────────────────────────
             _progresso = new ProgressBar
             {
                 IsIndeterminate = true, Height = 3,
-                Margin = new Thickness(0, 8, 0, 0), Visibility = Visibility.Collapsed
+                Margin = new Thickness(0, 10, 0, 0), Visibility = Visibility.Collapsed
             };
-            Grid.SetRow(_progresso, 4);
-            grid.Children.Add(_progresso);
+            stack.Children.Add(_progresso);
 
             // ── Botão Entrar ─────────────────────────────────────────────────
             _btnEntrar = new Button
             {
                 Content = "Entrar", Height = 34, FontSize = 13,
-                Margin = new Thickness(0, 9, 0, 0), IsDefault = true
+                Margin = new Thickness(0, 20, 0, 0), IsDefault = true
             };
             _btnEntrar.Click += async (_, _) => await TentarLogin();
-            Grid.SetRow(_btnEntrar, 6);
-            grid.Children.Add(_btnEntrar);
+            stack.Children.Add(_btnEntrar);
 
             // ── Link "Configurar conexão" ───────────────────────────────────
             _btnConfig = new Button
@@ -125,13 +132,12 @@ namespace MapaMaquinas.Views
                 Background = Brushes.Transparent, BorderThickness = new Thickness(0),
                 Foreground = new SolidColorBrush(Color.FromRgb(70, 100, 180)),
                 FontSize = 10, HorizontalAlignment = HorizontalAlignment.Center,
-                Margin = new Thickness(0, 5, 0, 0), Cursor = Cursors.Hand
+                Margin = new Thickness(0, 14, 0, 0), Cursor = Cursors.Hand
             };
             _btnConfig.Click += (_, _) => AbrirConfigConexao();
-            Grid.SetRow(_btnConfig, 7);
-            grid.Children.Add(_btnConfig);
+            stack.Children.Add(_btnConfig);
 
-            return grid;
+            return stack;
         }
 
         private static bool ApenasDigitos(string texto)
@@ -203,7 +209,9 @@ namespace MapaMaquinas.Views
                     LoginOk = true;
                     CodigoAutenticado = usuario;
                     DialogResult = true;
-                    Close();
+                    // Close() é chamado implicitamente pelo DialogResult,
+                    // mas o App.cs precisa ter ShutdownMode correto para
+                    // não encerrar a aplicação inteira aqui — ver App.cs.
                     break;
 
                 case ResultadoLogin.UsuarioNaoEncontrado:

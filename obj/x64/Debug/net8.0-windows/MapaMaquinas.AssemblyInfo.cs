@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("MapaMaquinas")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+a65193609346def3d8f8065be9283fb638897ffd")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+0faa95f82a27b1c9a154cd751700a021a67d2286")]
 [assembly: System.Reflection.AssemblyProductAttribute("MapaMaquinas")]
 [assembly: System.Reflection.AssemblyTitleAttribute("MapaMaquinas")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
