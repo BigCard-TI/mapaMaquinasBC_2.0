@@ -34,7 +34,8 @@ namespace MapaMaquinas
         private ScrollViewer      _mapaScroll      = null!;
         private Image             _imgFundo        = null!;
         private TextBox           _edBusca         = null!;
-        private TextBlock         _lblStatus       = null!;
+        private TextBlock         _lblStatus       = null!;   // lado esquerdo: empresa
+        private TextBlock         _lblPingStatus   = null!;   // lado direito: ping/timer
         private MenuItem          _menuSalvar      = null!;
         private MenuItem          _menuExportarPng = null!;
 
@@ -88,7 +89,7 @@ namespace MapaMaquinas
             _config      = new Config();
             _jsonManager = new JsonManager(_repositorio);
 
-            Title        = "Mapa Máquinas";
+            Title        = "Mapa de Máquinas — BigCard TI";
             Width        = 1280;
             Height       = 780;
             MinWidth     = 800;
@@ -100,6 +101,7 @@ namespace MapaMaquinas
             _pingQueue = new PingQueue(Dispatcher);
             _pingQueue.ProgressoAtualizado += OnPingProgresso;
             _pingQueue.CicloCompleto       += OnPingCicloCompleto;
+            _pingQueue.ContagemRegressiva  += OnContagemRegressiva;
             Loaded += OnLoaded;
         }
 
@@ -185,15 +187,35 @@ namespace MapaMaquinas
             Grid.SetRow(splitter, 2);
             grid.Children.Add(splitter);
 
-            // ── Status bar ────────────────────────────────────────────────────
+            // ── Status bar — dois campos independentes ────────────────────────
+            // _lblStatus (esquerda) = empresa/contagem de máquinas
+            // _lblPingStatus (direita) = timer de ping
+            // Os dois NUNCA se sobrescrevem, então trocar de empresa não
+            // apaga o timer, e o timer rodando não apaga a contagem de máquinas.
             var statusBar = new Border
             {
-                Background = new SolidColorBrush(Color.FromRgb(240, 240, 240)),
-                BorderBrush = Brushes.LightGray, BorderThickness = new Thickness(0, 1, 0, 0),
-                Padding = new Thickness(8, 3, 8, 3)
+                Background      = new SolidColorBrush(Color.FromRgb(240, 240, 240)),
+                BorderBrush     = Brushes.LightGray,
+                BorderThickness = new Thickness(0, 1, 0, 0),
+                Padding         = new Thickness(8, 3, 8, 3)
             };
-            _lblStatus = new TextBlock { FontSize = 11 };
-            statusBar.Child = _lblStatus;
+
+            var statusDock = new DockPanel();
+
+            _lblPingStatus = new TextBlock
+            {
+                FontSize          = 11,
+                Foreground        = new SolidColorBrush(Color.FromRgb(80, 80, 90)),
+                VerticalAlignment = VerticalAlignment.Center,
+                Margin            = new Thickness(12, 0, 0, 0)
+            };
+            DockPanel.SetDock(_lblPingStatus, Dock.Right);
+            statusDock.Children.Add(_lblPingStatus);
+
+            _lblStatus = new TextBlock { FontSize = 11, VerticalAlignment = VerticalAlignment.Center };
+            statusDock.Children.Add(_lblStatus);
+
+            statusBar.Child = statusDock;
             Grid.SetRow(statusBar, 3);
             grid.Children.Add(statusBar);
 
@@ -1152,12 +1174,11 @@ namespace MapaMaquinas
         // ── Callbacks do PingQueue ────────────────────────────────────────────
         private void OnPingProgresso(int atual, int total)
         {
-            if (atual == 0)
-                AtualizarStatus(_lblStatus.Text.Split('|')[0].TrimEnd() +
-                    $"  |  Ping: aguardando próximo ciclo (2 min)");
-            else
-                AtualizarStatus(_lblStatus.Text.Split('|')[0].TrimEnd() +
-                    $"  |  Ping: verificando {atual}/{total}...");
+            // Escreve APENAS no label de ping — nunca toca em _lblStatus,
+            // que pertence exclusivamente à empresa/contagem de máquinas.
+            _lblPingStatus.Text = atual == 0
+                ? "⏳ Aguardando próximo ciclo..."
+                : $"🔄 Verificando {atual}/{total}...";
 
             AtualizarContadoresLegenda();
         }
@@ -1165,6 +1186,29 @@ namespace MapaMaquinas
         private void OnPingCicloCompleto()
         {
             AtualizarContadoresLegenda();
+        }
+
+        private void OnContagemRegressiva(int segundosRestantes)
+        {
+            // Disparado a cada segundo pelo PingQueue — totalmente independente
+            // de qual empresa está aberta no canvas no momento. Trocar de aba,
+            // editar máquina, salvar, etc. NUNCA interrompe esta contagem.
+            if (segundosRestantes <= 0)
+            {
+                _lblPingStatus.Text = "";
+                return;
+            }
+
+            var min = segundosRestantes / 60;
+            var seg = segundosRestantes % 60;
+
+            _lblPingStatus.Foreground = segundosRestantes > 60
+                ? new SolidColorBrush(Color.FromRgb(80, 80, 90))    // cinza — mais de 1 min
+                : segundosRestantes > 20
+                    ? new SolidColorBrush(Color.FromRgb(190, 140, 0))  // amarelo — menos de 1 min
+                    : new SolidColorBrush(Color.FromRgb(190, 50, 50)); // vermelho — menos de 20s
+
+            _lblPingStatus.Text = $"⏱ Próximo ping em {min:D2}:{seg:D2}";
         }
 
         // ── Desfazer ──────────────────────────────────────────────────────────

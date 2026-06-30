@@ -30,6 +30,7 @@ namespace MapaMaquinas.Services
 
         public event Action<int, int>? ProgressoAtualizado;
         public event Action?           CicloCompleto;
+        public event Action<int>?      ContagemRegressiva;    // segundos restantes até o próximo ciclo
 
         public PingQueue(Dispatcher dispatcher) => _dispatcher = dispatcher;
 
@@ -118,9 +119,25 @@ namespace MapaMaquinas.Services
                     CicloCompleto?.Invoke();
                 });
 
-                // 2 minutos de pausa — não é interrompida por nada além de Parar()
-                try   { await Task.Delay(PausaEntreCiclos, token); }
-                catch (TaskCanceledException) { return; }
+                // ── Pausa de 2 minutos com contagem regressiva segundo a segundo ──
+                // Esta contagem NUNCA é interrompida por troca de aba, salvar,
+                // editar máquina ou qualquer ação do usuário — só por Parar()
+                // (fechar o app). O evento dispara a cada segundo para o
+                // MainWindow manter o label do timer sempre atualizado,
+                // mesmo que a empresa visível no canvas mude no meio do caminho.
+                int totalSegundos = (int)PausaEntreCiclos.TotalSeconds;
+                for (int s = totalSegundos; s > 0; s--)
+                {
+                    if (token.IsCancellationRequested) return;
+
+                    int restantes = s;
+                    _dispatcher.Invoke(() => ContagemRegressiva?.Invoke(restantes));
+
+                    try   { await Task.Delay(1000, token); }
+                    catch (TaskCanceledException) { return; }
+                }
+
+                _dispatcher.Invoke(() => ContagemRegressiva?.Invoke(0));
             }
         }
 

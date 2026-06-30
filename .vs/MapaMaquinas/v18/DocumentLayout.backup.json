@@ -7,12 +7,12 @@
       "RelativeMoniker": "D:0:0:{0461D450-AAE0-9228-5530-DE411B6F510F}|MapaMaquinas.csproj|solutionrelative:janelalogin.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{0461D450-AAE0-9228-5530-DE411B6F510F}|MapaMaquinas.csproj|c:\\users\\rafael.souza\\desktop\\bc - rafael\\projects\\projects\\mapamaquinasbc_2.0\\mainwindow.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{0461D450-AAE0-9228-5530-DE411B6F510F}|MapaMaquinas.csproj|solutionrelative:mainwindow.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{0461D450-AAE0-9228-5530-DE411B6F510F}|MapaMaquinas.csproj|c:\\users\\rafael.souza\\desktop\\bc - rafael\\projects\\projects\\mapamaquinasbc_2.0\\janelaconfigconexao.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{0461D450-AAE0-9228-5530-DE411B6F510F}|MapaMaquinas.csproj|solutionrelative:janelaconfigconexao.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0461D450-AAE0-9228-5530-DE411B6F510F}|MapaMaquinas.csproj|c:\\users\\rafael.souza\\desktop\\bc - rafael\\projects\\projects\\mapamaquinasbc_2.0\\mainwindow.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0461D450-AAE0-9228-5530-DE411B6F510F}|MapaMaquinas.csproj|solutionrelative:mainwindow.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{0461D450-AAE0-9228-5530-DE411B6F510F}|MapaMaquinas.csproj|c:\\users\\rafael.souza\\desktop\\bc - rafael\\projects\\projects\\mapamaquinasbc_2.0\\app.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -22,7 +22,7 @@
   "DocumentGroupContainers": [
     {
       "Orientation": 0,
-      "VerticalTabListWidth": 245,
+      "VerticalTabListWidth": 160,
       "DocumentGroups": [
         {
           "DockedWidth": 200,
@@ -30,7 +30,7 @@
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 1,
               "Title": "JanelaConfigConexao.cs",
               "DocumentMoniker": "C:\\Users\\rafael.souza\\Desktop\\BC - Rafael\\Projects\\Projects\\mapaMaquinasBC_2.0\\JanelaConfigConexao.cs",
               "RelativeDocumentMoniker": "JanelaConfigConexao.cs",
@@ -47,16 +47,16 @@
               "Title": "JanelaLogin.cs",
               "DocumentMoniker": "C:\\Users\\rafael.souza\\Desktop\\BC - Rafael\\Projects\\Projects\\mapaMaquinasBC_2.0\\JanelaLogin.cs",
               "RelativeDocumentMoniker": "JanelaLogin.cs",
-              "ToolTip": "C:\\Users\\rafael.souza\\Desktop\\BC - Rafael\\Projects\\Projects\\mapaMaquinasBC_2.0\\JanelaLogin.cs",
-              "RelativeToolTip": "JanelaLogin.cs",
-              "ViewState": "AgIAAEQAAAAAAAAAAADwv1oAAAAAAAAAAAAAAA==",
+              "ToolTip": "C:\\Users\\rafael.souza\\Desktop\\BC - Rafael\\Projects\\Projects\\mapaMaquinasBC_2.0\\JanelaLogin.cs*",
+              "RelativeToolTip": "JanelaLogin.cs*",
+              "ViewState": "AgIAABEAAAAAAAAAAAAxwB8AAAAdAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-06-30T13:46:51.974Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 2,
               "Title": "MainWindow.cs",
               "DocumentMoniker": "C:\\Users\\rafael.souza\\Desktop\\BC - Rafael\\Projects\\Projects\\mapaMaquinasBC_2.0\\MainWindow.cs",
               "RelativeDocumentMoniker": "MainWindow.cs",
@@ -77,8 +77,7 @@
               "RelativeToolTip": "App.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAABAAAAAdAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-06-29T18:08:44.501Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-06-29T18:08:44.501Z"
             }
           ]
         }

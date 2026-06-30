@@ -1,3 +1,4 @@
+C:\Users\rafael.souza\Desktop\BC - Rafael\Projects\Projects\mapaMaquinasBC_2.0\obj\x64\Debug\net8.0-windows\MapaMaquinas.csproj.AssemblyReference.cache
 C:\Users\rafael.souza\Desktop\BC - Rafael\Projects\Projects\mapaMaquinasBC_2.0\obj\x64\Debug\net8.0-windows\MapaMaquinas.GeneratedMSBuildEditorConfig.editorconfig
 C:\Users\rafael.souza\Desktop\BC - Rafael\Projects\Projects\mapaMaquinasBC_2.0\obj\x64\Debug\net8.0-windows\MapaMaquinas.AssemblyInfoInputs.cache
 C:\Users\rafael.souza\Desktop\BC - Rafael\Projects\Projects\mapaMaquinasBC_2.0\obj\x64\Debug\net8.0-windows\MapaMaquinas.AssemblyInfo.cs
@@ -8,11 +9,6 @@ C:\Users\rafael.souza\Desktop\BC - Rafael\Projects\Projects\mapaMaquinasBC_2.0\b
 C:\Users\rafael.souza\Desktop\BC - Rafael\Projects\Projects\mapaMaquinasBC_2.0\bin\x64\Debug\net8.0-windows\MapaMaquinas.runtimeconfig.json
 C:\Users\rafael.souza\Desktop\BC - Rafael\Projects\Projects\mapaMaquinasBC_2.0\bin\x64\Debug\net8.0-windows\MapaMaquinas.dll
 C:\Users\rafael.souza\Desktop\BC - Rafael\Projects\Projects\mapaMaquinasBC_2.0\bin\x64\Debug\net8.0-windows\MapaMaquinas.pdb
-C:\Users\rafael.souza\Desktop\BC - Rafael\Projects\Projects\mapaMaquinasBC_2.0\obj\x64\Debug\net8.0-windows\MapaMaquinas.dll
-C:\Users\rafael.souza\Desktop\BC - Rafael\Projects\Projects\mapaMaquinasBC_2.0\obj\x64\Debug\net8.0-windows\refint\MapaMaquinas.dll
-C:\Users\rafael.souza\Desktop\BC - Rafael\Projects\Projects\mapaMaquinasBC_2.0\obj\x64\Debug\net8.0-windows\MapaMaquinas.pdb
-C:\Users\rafael.souza\Desktop\BC - Rafael\Projects\Projects\mapaMaquinasBC_2.0\obj\x64\Debug\net8.0-windows\MapaMaquinas.genruntimeconfig.cache
-C:\Users\rafael.souza\Desktop\BC - Rafael\Projects\Projects\mapaMaquinasBC_2.0\obj\x64\Debug\net8.0-windows\ref\MapaMaquinas.dll
 C:\Users\rafael.souza\Desktop\BC - Rafael\Projects\Projects\mapaMaquinasBC_2.0\bin\x64\Debug\net8.0-windows\Azure.Core.dll
 C:\Users\rafael.souza\Desktop\BC - Rafael\Projects\Projects\mapaMaquinasBC_2.0\bin\x64\Debug\net8.0-windows\Azure.Identity.dll
 C:\Users\rafael.souza\Desktop\BC - Rafael\Projects\Projects\mapaMaquinasBC_2.0\bin\x64\Debug\net8.0-windows\Microsoft.Bcl.AsyncInterfaces.dll
@@ -47,5 +43,9 @@ C:\Users\rafael.souza\Desktop\BC - Rafael\Projects\Projects\mapaMaquinasBC_2.0\b
 C:\Users\rafael.souza\Desktop\BC - Rafael\Projects\Projects\mapaMaquinasBC_2.0\bin\x64\Debug\net8.0-windows\runtimes\win-x64\native\Microsoft.Data.SqlClient.SNI.dll
 C:\Users\rafael.souza\Desktop\BC - Rafael\Projects\Projects\mapaMaquinasBC_2.0\bin\x64\Debug\net8.0-windows\runtimes\win-x86\native\Microsoft.Data.SqlClient.SNI.dll
 C:\Users\rafael.souza\Desktop\BC - Rafael\Projects\Projects\mapaMaquinasBC_2.0\bin\x64\Debug\net8.0-windows\runtimes\win\lib\net8.0\System.Runtime.Caching.dll
-C:\Users\rafael.souza\Desktop\BC - Rafael\Projects\Projects\mapaMaquinasBC_2.0\obj\x64\Debug\net8.0-windows\MapaMaquinas.csproj.AssemblyReference.cache
 C:\Users\rafael.souza\Desktop\BC - Rafael\Projects\Projects\mapaMaquinasBC_2.0\obj\x64\Debug\net8.0-windows\MapaMaqu.40DB5C24.Up2Date
+C:\Users\rafael.souza\Desktop\BC - Rafael\Projects\Projects\mapaMaquinasBC_2.0\obj\x64\Debug\net8.0-windows\MapaMaquinas.dll
+C:\Users\rafael.souza\Desktop\BC - Rafael\Projects\Projects\mapaMaquinasBC_2.0\obj\x64\Debug\net8.0-windows\refint\MapaMaquinas.dll
+C:\Users\rafael.souza\Desktop\BC - Rafael\Projects\Projects\mapaMaquinasBC_2.0\obj\x64\Debug\net8.0-windows\MapaMaquinas.pdb
+C:\Users\rafael.souza\Desktop\BC - Rafael\Projects\Projects\mapaMaquinasBC_2.0\obj\x64\Debug\net8.0-windows\MapaMaquinas.genruntimeconfig.cache
+C:\Users\rafael.souza\Desktop\BC - Rafael\Projects\Projects\mapaMaquinasBC_2.0\obj\x64\Debug\net8.0-windows\ref\MapaMaquinas.dll

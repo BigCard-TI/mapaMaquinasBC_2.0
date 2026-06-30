@@ -29,7 +29,7 @@ namespace MapaMaquinas.Views
         {
             Title       = "MapaMaquinas — Login";
             Width       = 380;
-            Height      = 420;
+            Height      = 380;
             ResizeMode  = ResizeMode.NoResize;
             WindowStartupLocation = WindowStartupLocation.CenterScreen;
             WindowStyle = WindowStyle.SingleBorderWindow;
