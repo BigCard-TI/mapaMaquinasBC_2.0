@@ -17,6 +17,23 @@
     <Optimize>true</Optimize>
   </PropertyGroup>
 
-  <!-- Sem referências NuGet extras: usa apenas APIs do .NET 8 padrão -->
+  <!--
+    Duas referências NuGet adicionadas para a tela de login:
+
+    Microsoft.Data.SqlClient
+      Necessário para conectar ao SQL Server (tabela USUARIOS).
+      No .NET Framework isso vinha embutido (System.Data.SqlClient),
+      mas no .NET 8 precisa ser referenciado explicitamente.
+
+    Microsoft.Win32.Registry
+      Necessário para ler/gravar no Registro do Windows (HKCU), onde
+      a connection string criptografada via DPAPI é armazenada.
+      System.Security.Cryptography.ProtectedData (DPAPI em si) já vem
+      embutido no .NET 8 Windows e não precisa de pacote.
+  -->
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="5.2.2" />
+    <PackageReference Include="Microsoft.Win32.Registry" Version="5.0.0" />
+  </ItemGroup>
 
 </Project>

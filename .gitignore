@@ -6,3 +6,9 @@ obj/
 config.ini
 data/
 *.png
+
+# Conexão SQL Server fica apenas no Registro do Windows (DPAPI),
+# nunca em arquivo — mas qualquer .dat/.cfg acidental também é ignorado
+*.dat
+*.cfg
+appsettings*.json
